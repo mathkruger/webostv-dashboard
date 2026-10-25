@@ -20,10 +20,14 @@
       if (STATE.allOpen) {
         App.allApps.closeAllApps();
       }
+      if (STATE.newsOpen) {
+        App.news.closeNews();
+      }
       App.returnWatch.ensureReturnWatcher(false);
       App.clock.updateClock();
       App.wallpaper.applyWallpaper();
       App.weather.refreshWeather(false);
+      App.news.refreshNews(false);
       App.home.renderHome();
     }, false);
 
@@ -35,6 +39,7 @@
       STATE.appsFocus = true;
       STATE.gearFocus = false;
       STATE.emptyFocus = false;
+      STATE.newsFocus = false;
       App.home.refreshHomeFocus();
     }, false);
 
@@ -46,6 +51,7 @@
       STATE.gearFocus = true;
       STATE.appsFocus = false;
       STATE.emptyFocus = false;
+      STATE.newsFocus = false;
       App.home.refreshHomeFocus();
     }, false);
 
@@ -59,6 +65,7 @@
     els.emptyAction.addEventListener('mouseover', function () {
       STATE.gearFocus = false;
       STATE.emptyFocus = true;
+      STATE.newsFocus = false;
       App.home.refreshHomeFocus();
     }, false);
 
@@ -82,6 +89,21 @@
     els.wallpaperGrid.addEventListener('click', App.settings.onWallpaperClick, false);
     els.weatherSettingsList.addEventListener('mouseover', App.settings.onWeatherHover, false);
     els.weatherSettingsList.addEventListener('click', App.settings.onWeatherClick, false);
+    els.newsSettingsList.addEventListener('mouseover', App.settings.onNewsHover, false);
+    els.newsSettingsList.addEventListener('click', App.settings.onNewsClick, false);
+
+    els.news.addEventListener('click', App.news.onNewsCardClick, false);
+    els.news.addEventListener('mouseover', App.news.onNewsCardHover, false);
+    els.newsDone.addEventListener('click', App.news.onNewsDoneClick, false);
+    els.newsDone.addEventListener('mouseover', App.news.onNewsDoneHover, false);
+    els.newsRefresh.addEventListener('mouseover', App.news.onNewsActionHover, false);
+    els.newsRefresh.addEventListener('click', App.news.onNewsActionClick, false);
+    els.newsPrev.addEventListener('mouseover', App.news.onNewsActionHover, false);
+    els.newsPrev.addEventListener('click', App.news.onNewsActionClick, false);
+    els.newsNext.addEventListener('mouseover', App.news.onNewsActionHover, false);
+    els.newsNext.addEventListener('click', App.news.onNewsActionClick, false);
+    els.newsList.addEventListener('mouseover', App.news.onNewsItemHover, false);
+    els.newsList.addEventListener('click', App.news.onNewsItemClick, false);
 
     els.grid.addEventListener('mouseover', App.home.onGridHover, false);
     els.grid.addEventListener('click', App.home.onGridClick, false);
@@ -103,6 +125,7 @@
       }
       App.clock.updateClock();
       App.weather.refreshWeather(false);
+      App.news.refreshNews(false);
       if (STATE.allOpen && !STATE.launching) {
         App.allApps.closeAllApps();
       }
@@ -132,6 +155,7 @@
     STATE.wallpaper = App.wallpaper.readWallpaperSetting();
     App.wallpaper.applyWallpaper();
     App.weather.startWeather();
+    App.news.startNews();
 
     App.home.renderHome();
     App.ui.showHintOnce();

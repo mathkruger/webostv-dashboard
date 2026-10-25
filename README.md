@@ -12,6 +12,8 @@ O app funciona como uma tela inicial alternativa: uma grade de atalhos para apps
 - Ajustes no próprio app: adicionar, remover e reordenar atalhos.
 - Aba **Aparência** com 6 wallpapers, 5 cores sólidas e modo aleatório por abertura.
 - Previsão do tempo ao lado do relógio, com cidade configurável e atualização a cada 15 minutos via [Open-Meteo](https://open-meteo.com/).
+- Card de notícias ao lado do clima, com os 10 títulos mais recentes alternando na tela inicial e atualização a cada 1 hora.
+- Página de notícias com feed RSS configurável, resultados paginados, botão **Atualizar** e abertura da matéria no navegador da TV.
 - Catálogo ao vivo via Luna/Homebrew Channel, com fallback local.
 - Autostart no boot e watcher para abrir o Dashboard ao acordar do standby.
 - Retorno automático ao Dashboard ao fechar um app aberto por ele (configurável).
@@ -90,6 +92,8 @@ Se o IP local não for detectado corretamente (VPN, Docker, várias interfaces),
   - `Voltar` cancela a movimentação.
   - A aba **Aparência** permite escolher um dos 6 wallpapers, uma das 5 cores sólidas ou o modo **Aleatório**, que sorteia um wallpaper a cada abertura do app.
   - A aba **Clima** ativa ou desativa a previsão do tempo e permite definir a cidade. Use `OK` em **Cidade** para abrir o teclado da TV, digite o nome e confirme com `OK`; `Voltar` cancela a edição. A busca aceita formatos como `Itu`, `Itu, SP` e `Itu SP`. **Atualizar agora** força uma nova consulta. A previsão vem ativada por padrão com a cidade **São Paulo**; desative a opção se não quiser usá-la.
+  - A aba **Notícias** define o feed RSS usado pelo card e pela página de notícias. Use `OK` em **Feed RSS** para digitar o endereço no teclado da TV e confirme com `OK`; `Voltar` cancela. **Atualizar agora** força uma nova leitura e **Restaurar feed padrão** volta para a Agência Brasil. O feed padrão é `https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml`.
+  - Na tela inicial, use `↑` a partir da primeira linha de atalhos para focar o card de notícias e `OK` para abrir a página. Nela, `↑`/`↓` navegam pelas matérias, `←`/`→` trocam de página e `OK` abre a matéria no navegador da TV. `Voltar` fecha a página.
   - Use `↑`/`↓`/`←`/`→` para navegar entre as abas e os cartões; `OK` aplica a opção.
 - A engrenagem no topo também abre os ajustes.
 
@@ -173,6 +177,7 @@ app/                         App web instalado na TV
       shortcuts.js           Persistência e manipulação de atalhos
       wallpaper.js           Seleção e aplicação de wallpaper
       weather.js             Previsão do tempo (Open-Meteo) e cidade
+      news.js                Card, página paginada e leitura de feeds RSS
       icons.js               Cache, extração e renderização de ícones
       catalog.js             Catálogo de apps/entradas e atualização
       launcher.js            Abertura de apps e entradas
@@ -181,7 +186,9 @@ app/                         App web instalado na TV
     pages/
       home.js                Tela inicial e navegação
       allapps.js             Lista completa de apps e entradas
-      settings.js            Ajustes, atalhos, movimento, aparência e clima
+      settings.js            Ajustes, atalhos, movimento, aparência, clima e notícias
+  certs/
+    cacert.pem               Bundle de CAs usado pelo curl no fallback de notícias
   webOSTVjs-1.2.13/          Bridge webOS
   assets/                    Fontes e imagens
     wallpapers/              Wallpapers e miniaturas de prévia
@@ -207,6 +214,8 @@ As preferências ficam no `localStorage` da TV:
 - `dashboard.weather.v1`: clima ativado, cidade e coordenadas resolvidas.
 - `dashboard.weather.cache.v1`: última previsão obtida, usada para exibir os dados antes da próxima consulta.
 - `dashboard.weather.transport.v1`: `http` quando a TV não aceita a cadeia de certificados atual do Open-Meteo; nesse caso o app usa HTTP automaticamente.
+- `dashboard.news.v1`: endereço do feed RSS de notícias.
+- `dashboard.news.cache.v1`: últimas notícias lidas, usadas para exibir o card imediatamente ao abrir o app.
 
 Os ícones são cacheados por 14 dias. A opção **Atualizar apps e ícones** força uma nova leitura.
 
@@ -251,6 +260,15 @@ Os ícones são cacheados por 14 dias. A opção **Atualizar apps e ícones** fo
 - Use **Atualizar apps e ícones** nos ajustes.
 - Sem root, o app usa o catálogo fallback e não consegue extrair ícones.
 
+### As notícias não carregam
+
+- Confirme que a TV tem acesso à internet.
+- Confira o endereço do feed em Ajustes → Notícias. O feed precisa ser RSS 2.0 ou Atom.
+- O feed padrão (Agência Brasil) libera CORS, mas o certificado dele não é reconhecido pelo bundle de CAs antigo do webOS 4.x. Nesse caso o app baixa o feed pelo Homebrew Channel usando o bundle atualizado em `certs/cacert.pem`; é necessário root e o Homebrew Channel ativo.
+- Feeds de outros sites também podem bloquear CORS ou usar raízes não reconhecidas pela TV. O app tenta, nesta ordem: `XMLHttpRequest`, `curl` com o bundle incluído, `curl` com as CAs do sistema, `curl -k` e `wget`.
+- Sem root, só funcionam feeds cujo certificado a TV confia e que liberam CORS.
+- Use **Atualizar agora** para tentar de novo. A última lista fica em cache e continua visível se a consulta falhar.
+
 ### O clima não carrega
 
 - Confirme que a TV tem acesso à internet.
@@ -263,6 +281,9 @@ Os ícones são cacheados por 14 dias. A opção **Atualizar apps e ícones** fo
 
 - O app é compatível com Chromium 53: evite sintaxe moderna como `async/await`, optional chaining, CSS grid, `gap` em flexbox e `backdrop-filter`.
 - O clima usa as APIs públicas do Open-Meteo via `XMLHttpRequest`, sem chave. A cidade é resolvida pela API de geocodificação e as coordenadas ficam salvas para as próximas consultas.
+- As notícias são lidas com `XMLHttpRequest` e `DOMParser`. Se a leitura direta falhar (CORS ou certificado), o app recorre ao Homebrew Channel e executa `curl` com `--cacert app/certs/cacert.pem`, com fallback para as CAs do sistema, `curl -k` e `wget`.
+- `app/certs/cacert.pem` é o bundle da Mozilla distribuído em <https://curl.se/ca/cacert.pem>. Atualize-o de tempos em tempos para acompanhar novas raízes.
+- As notícias configuradas ficam em `dashboard.news.v1` e o cache em `dashboard.news.cache.v1` no `localStorage`; reinstalar o app pelo Homebrew Channel preserva esses dados.
 - TVs com webOS 4.x podem rejeitar a cadeia de certificados atual do Open-Meteo (`ERR_INSECURE_RESPONSE`). Nesse caso o app tenta novamente por HTTP e guarda essa escolha em `dashboard.weather.transport.v1`. Em TVs com certificados atualizados, o HTTPS é usado normalmente.
 - Os módulos compartilham o namespace `window.Dashboard`; a ordem de carregamento é definida em `app/index.html`.
 - `ares-package` minifica os arquivos de `app/js/`; os arquivos instalados podem ter tamanho diferente dos fontes.

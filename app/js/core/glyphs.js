@@ -51,8 +51,22 @@
     return svg;
   }
 
+  function newsGlyph() {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.6');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('class', 'row-glyph');
+    svg.innerHTML = '<path d="M4 5.5h16v13H4z"/><path d="M8 8.5h8M8 11.5h8M8 14.5h5"/>';
+    return svg;
+  }
+
   App.glyphs = {
     inputGlyph: inputGlyph,
-    systemGlyph: systemGlyph
+    systemGlyph: systemGlyph,
+    newsGlyph: newsGlyph
   };
 })(window);

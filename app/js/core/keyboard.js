@@ -19,7 +19,9 @@
     if (isTextInput(active)) {
       if (code === KEY.BACK || code === KEY.ESC) {
         event.preventDefault();
-        if (App.weather && App.weather.cancelCityEdit) {
+        if (active === els.newsFeedInput && App.news && App.news.cancelFeedEdit) {
+          App.news.cancelFeedEdit();
+        } else if (App.weather && App.weather.cancelCityEdit) {
           App.weather.cancelCityEdit();
         }
       }
@@ -32,6 +34,8 @@
       App.settings.handleSettingsKey(code);
     } else if (STATE.screen === 'allapps') {
       App.allApps.handleAllAppsKey(code);
+    } else if (STATE.screen === 'news') {
+      App.news.handleNewsKey(code);
     } else {
       App.home.handleHomeKey(code);
     }

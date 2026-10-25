@@ -19,6 +19,7 @@
       STATE.emptyFocus = true;
       STATE.gearFocus = false;
       STATE.appsFocus = false;
+      STATE.newsFocus = false;
       refreshHomeFocus();
       return;
     }
@@ -60,12 +61,15 @@
     var tiles = els.grid.children;
     for (var i = 0; i < tiles.length; i += 1) {
       var tile = tiles[i];
-      var focused = !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus && Number(tile.getAttribute('data-index')) === STATE.homeFocus;
+      var focused = !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus && !STATE.newsFocus && Number(tile.getAttribute('data-index')) === STATE.homeFocus;
       tile.classList.toggle('focused', focused);
     }
     els.settingsButton.classList.toggle('focused', STATE.gearFocus);
     els.appsButton.classList.toggle('focused', STATE.appsFocus);
-    els.emptyAction.classList.toggle('focused', STATE.emptyFocus && !STATE.gearFocus && !STATE.appsFocus);
+    els.emptyAction.classList.toggle('focused', STATE.emptyFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.newsFocus);
+    if (els.news) {
+      els.news.classList.toggle('focused', STATE.newsFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus);
+    }
   }
 
   function onGridHover(event) {
@@ -77,11 +81,12 @@
       return;
     }
     var index = Number(tile.getAttribute('data-index'));
-    if (STATE.homeFocus !== index || STATE.gearFocus || STATE.appsFocus) {
+    if (STATE.homeFocus !== index || STATE.gearFocus || STATE.appsFocus || STATE.newsFocus) {
       STATE.homeFocus = index;
       STATE.gearFocus = false;
       STATE.appsFocus = false;
       STATE.emptyFocus = false;
+      STATE.newsFocus = false;
       refreshHomeFocus();
     }
   }
@@ -98,6 +103,7 @@
     STATE.homeFocus = index;
     STATE.gearFocus = false;
     STATE.appsFocus = false;
+    STATE.newsFocus = false;
     refreshHomeFocus();
     App.launcher.launchShortcut(STATE.shortcuts[index], tile);
   }
@@ -108,6 +114,20 @@
       return;
     }
     if (!STATE.shortcuts.length) {
+      if (STATE.newsFocus) {
+        if (code === KEY.ENTER) {
+          App.news.openNews();
+        } else if (code === KEY.DOWN) {
+          STATE.newsFocus = false;
+          STATE.emptyFocus = true;
+          refreshHomeFocus();
+        } else if (code === KEY.RIGHT) {
+          STATE.newsFocus = false;
+          STATE.appsFocus = true;
+          refreshHomeFocus();
+        }
+        return;
+      }
       if (STATE.appsFocus) {
         if (code === KEY.ENTER) {
           App.allApps.openAllApps();
@@ -138,8 +158,27 @@
       }
       if (code === KEY.ENTER) {
         App.settings.openSettings();
-      } else if (code === KEY.UP || code === KEY.LEFT) {
+      } else if (code === KEY.UP) {
         STATE.emptyFocus = false;
+        STATE.newsFocus = true;
+        refreshHomeFocus();
+      } else if (code === KEY.LEFT) {
+        STATE.emptyFocus = false;
+        STATE.appsFocus = true;
+        refreshHomeFocus();
+      }
+      return;
+    }
+
+    if (STATE.newsFocus) {
+      if (code === KEY.ENTER) {
+        App.news.openNews();
+      } else if (code === KEY.DOWN) {
+        STATE.newsFocus = false;
+        STATE.homeFocus = App.utils.clamp(STATE.homeFocus, 0, STATE.shortcuts.length - 1);
+        refreshHomeFocus();
+      } else if (code === KEY.RIGHT) {
+        STATE.newsFocus = false;
         STATE.appsFocus = true;
         refreshHomeFocus();
       }
@@ -192,7 +231,7 @@
       if (index >= columns) {
         STATE.homeFocus = index - columns;
       } else {
-        STATE.gearFocus = true;
+        STATE.newsFocus = true;
       }
     } else if (code === KEY.DOWN) {
       if (index + columns < count) {

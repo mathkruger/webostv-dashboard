@@ -25,6 +25,14 @@
             <div id="weather-city" class="weather-city"></div>
           </div>
         </div>
+        <button id="news" class="news-card" type="button" aria-label="Abrir notícias">
+          <div class="news-card-head">
+            <span id="news-card-source" class="news-card-source">Notícias</span>
+            <span id="news-card-meta" class="news-card-meta"></span>
+          </div>
+          <div id="news-card-title" class="news-card-title">Carregando notícias…</div>
+          <div id="news-card-dots" class="news-card-dots"></div>
+        </button>
       </div>
       <div class="topbar-actions">
         <button id="apps-button" class="apps-button" type="button" aria-label="Todos os apps">
@@ -70,6 +78,7 @@
         <button class="settings-tab active" type="button" data-tab="shortcuts">Atalhos</button>
         <button class="settings-tab" type="button" data-tab="appearance">Aparência</button>
         <button class="settings-tab" type="button" data-tab="weather">Clima</button>
+        <button class="settings-tab" type="button" data-tab="news">Notícias</button>
       </nav>
 
       <div id="settings-body-shortcuts" class="settings-body">
@@ -146,6 +155,49 @@
         </section>
       </div>
 
+      <div id="settings-body-news" class="settings-body weather-body hidden">
+        <section class="pane weather-pane">
+          <div class="pane-head">
+            <h2>Newsletter</h2>
+            <span id="news-settings-status" class="count">Desativado</span>
+          </div>
+          <div id="news-settings-list" class="list weather-settings-list news-settings-list">
+            <div class="row weather-city-row news-feed-row" data-news-index="0">
+              <div class="row-icon">
+                <svg class="row-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 5.5h16v13H4z"></path>
+                  <path d="M8 8.5h8M8 11.5h8M8 14.5h5"></path>
+                </svg>
+              </div>
+              <div class="row-title">Feed RSS</div>
+              <input id="news-feed-input" class="feed-input" type="text" placeholder="https://exemplo.com/feed.xml" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="row" data-news-index="1">
+              <div class="row-icon">
+                <svg class="row-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 11a8 8 0 1 0-2.3 6.7"></path>
+                  <path d="M20 5v6h-6"></path>
+                </svg>
+              </div>
+              <div class="row-title">Atualizar agora</div>
+              <div id="news-refresh-meta" class="row-meta">Agora</div>
+            </div>
+            <div class="row" data-news-index="2">
+              <div class="row-icon">
+                <svg class="row-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 5.5h16v13H4z"></path>
+                  <path d="M8 8.5h8M8 11.5h8M8 14.5h5"></path>
+                </svg>
+              </div>
+              <div class="row-title">Restaurar feed padrão</div>
+              <div class="row-meta">Agência Brasil</div>
+            </div>
+          </div>
+          <div id="news-feed-meta" class="weather-city-meta"></div>
+          <div id="news-settings-hint" class="pane-hint">As notícias são atualizadas a cada 1 hora</div>
+        </section>
+      </div>
+
       <footer class="settings-foot">
         <span id="status-text" class="status-text">Pronto</span>
         <span class="brand">Dashboard</span>
@@ -176,6 +228,37 @@
         <span class="brand">Dashboard</span>
       </footer>
     </section>
+
+    <section id="news-page" class="settings news-page" aria-hidden="true">
+      <header class="settings-head">
+        <div>
+          <h1>Notícias</h1>
+          <p id="news-source">Feed RSS</p>
+        </div>
+        <button id="news-done" class="done-button" type="button">Fechar</button>
+      </header>
+
+      <div class="news-toolbar">
+        <button id="news-refresh" class="done-button news-action" type="button" data-news-action="refresh">Atualizar</button>
+        <div class="news-pager">
+          <button id="news-prev" class="news-page-button" type="button" data-news-action="prev" aria-label="Página anterior">‹</button>
+          <span id="news-page-label" class="news-page-label">Página 1 de 1</span>
+          <button id="news-next" class="news-page-button" type="button" data-news-action="next" aria-label="Próxima página">›</button>
+        </div>
+        <span id="news-count" class="count"></span>
+      </div>
+
+      <div class="settings-body">
+        <section class="pane news-pane">
+          <div id="news-list" class="list news-list"></div>
+        </section>
+      </div>
+
+      <footer class="settings-foot">
+        <span id="news-status" class="status-text">Carregando notícias…</span>
+        <span class="brand">Dashboard</span>
+      </footer>
+    </section>
   </div>
 
   <script src="webOSTVjs-1.2.13/webOSTV.js"></script>
@@ -193,6 +276,7 @@
   <script src="js/services/shortcuts.js"></script>
   <script src="js/services/wallpaper.js"></script>
   <script src="js/services/weather.js"></script>
+  <script src="js/services/news.js"></script>
   <script src="js/services/icons.js"></script>
   <script src="js/services/catalog.js"></script>
   <script src="js/services/launcher.js"></script>

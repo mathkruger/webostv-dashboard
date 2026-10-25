@@ -21,6 +21,11 @@
     els.weatherTemp = $('weather-temp');
     els.weatherDesc = $('weather-desc');
     els.weatherCity = $('weather-city');
+    els.news = $('news');
+    els.newsCardSource = $('news-card-source');
+    els.newsCardMeta = $('news-card-meta');
+    els.newsCardTitle = $('news-card-title');
+    els.newsCardDots = $('news-card-dots');
     els.settingsButton = $('settings-button');
     els.appsButton = $('apps-button');
     els.home = $('home');
@@ -35,6 +40,13 @@
     els.settingsBodyShortcuts = $('settings-body-shortcuts');
     els.settingsBodyAppearance = $('settings-body-appearance');
     els.settingsBodyWeather = $('settings-body-weather');
+    els.settingsBodyNews = $('settings-body-news');
+    els.newsSettingsList = $('news-settings-list');
+    els.newsFeedInput = $('news-feed-input');
+    els.newsFeedMeta = $('news-feed-meta');
+    els.newsRefreshMeta = $('news-refresh-meta');
+    els.newsSettingsStatus = $('news-settings-status');
+    els.newsSettingsHint = $('news-settings-hint');
     els.weatherSettingsList = $('weather-settings-list');
     els.weatherToggleSwitch = $('weather-toggle-switch');
     els.weatherToggleMeta = $('weather-toggle-meta');
@@ -55,6 +67,16 @@
     els.allappsList = $('allapps-list');
     els.allappsCount = $('allapps-count');
     els.allappsStatus = $('allapps-status');
+    els.newsPage = $('news-page');
+    els.newsDone = $('news-done');
+    els.newsRefresh = $('news-refresh');
+    els.newsPrev = $('news-prev');
+    els.newsNext = $('news-next');
+    els.newsPageLabel = $('news-page-label');
+    els.newsCount = $('news-count');
+    els.newsSource = $('news-source');
+    els.newsList = $('news-list');
+    els.newsStatus = $('news-status');
   }
 
   function closest(element, selector) {

@@ -8,7 +8,7 @@
   var CONFIG = App.config;
   var KEY = App.KEY;
   var WALLPAPER_COLUMNS = App.WALLPAPER_COLUMNS;
-  var TABS = ['shortcuts', 'appearance', 'weather'];
+  var TABS = ['shortcuts', 'appearance', 'weather', 'news'];
   var wallpaperEntries = [];
   var wallpaperCards = [];
 
@@ -20,6 +20,7 @@
     STATE.screen = 'settings';
     STATE.moving = null;
     STATE.appsFocus = false;
+    STATE.newsFocus = false;
     STATE.settingsTab = 'shortcuts';
     STATE.tabIndex = 0;
     STATE.currentIndex = STATE.shortcuts.length ? App.utils.clamp(STATE.currentIndex, 0, STATE.shortcuts.length - 1) : 0;
@@ -44,6 +45,9 @@
     }
     if (STATE.weatherEditing) {
       App.weather.finishCityEdit(false);
+    }
+    if (STATE.newsEditing) {
+      App.news.finishFeedEdit(false);
     }
     STATE.settingsOpen = false;
     STATE.screen = 'home';
@@ -70,20 +74,25 @@
     if (els.settingsBodyWeather) {
       els.settingsBodyWeather.classList.toggle('hidden', STATE.settingsTab !== 'weather');
     }
+    if (els.settingsBodyNews) {
+      els.settingsBodyNews.classList.toggle('hidden', STATE.settingsTab !== 'news');
+    }
   }
 
   function setSettingsTab(tab) {
-    if (tab !== 'appearance' && tab !== 'weather') {
+    if (TABS.indexOf(tab) < 0) {
       tab = 'shortcuts';
     }
     STATE.settingsTab = tab;
-    STATE.tabIndex = tab === 'appearance' ? 1 : (tab === 'weather' ? 2 : 0);
+    STATE.tabIndex = TABS.indexOf(tab);
     updateSettingsTabVisuals();
     if (STATE.settingsTab === 'appearance') {
       STATE.wallpaperIndex = App.wallpaper.wallpaperSelectedIndex();
       renderWallpaperList();
     } else if (STATE.settingsTab === 'weather') {
       App.weather.renderWeatherSettings();
+    } else if (STATE.settingsTab === 'news') {
+      App.news.renderNewsSettings();
     }
     refreshSettingsFocus();
   }
@@ -96,6 +105,10 @@
       STATE.settingsZone = 'weather';
       STATE.weatherIndex = App.utils.clamp(STATE.weatherIndex, 0, 2);
       App.weather.renderWeatherSettings();
+    } else if (STATE.settingsTab === 'news') {
+      STATE.settingsZone = 'news';
+      STATE.newsSettingsIndex = App.utils.clamp(STATE.newsSettingsIndex, 0, 2);
+      App.news.renderNewsSettings();
     } else {
       STATE.settingsZone = STATE.shortcuts.length ? 'current' : 'add';
       STATE.currentIndex = App.utils.clamp(STATE.currentIndex, 0, Math.max(0, STATE.shortcuts.length - 1));
@@ -187,6 +200,17 @@
     }
   }
 
+  function refreshNewsFocus() {
+    if (!STATE.settingsOpen || !els.newsSettingsList) {
+      return;
+    }
+    var rows = els.newsSettingsList.querySelectorAll('[data-news-index]');
+    for (var i = 0; i < rows.length; i += 1) {
+      var index = Number(rows[i].getAttribute('data-news-index'));
+      rows[i].classList.toggle('focused', STATE.settingsTab === 'news' && STATE.settingsZone === 'news' && index === STATE.newsSettingsIndex);
+    }
+  }
+
   function renderSettings() {
     if (!STATE.settingsOpen) {
       return;
@@ -200,6 +224,8 @@
       renderWallpaperList();
     } else if (STATE.settingsTab === 'weather') {
       App.weather.renderWeatherSettings();
+    } else if (STATE.settingsTab === 'news') {
+      App.news.renderNewsSettings();
     }
     els.currentCount.textContent = String(STATE.shortcuts.length);
     els.currentList.scrollTop = currentScroll;
@@ -471,6 +497,7 @@
 
     refreshWallpaperFocus();
     refreshWeatherFocus();
+    refreshNewsFocus();
 
     if (STATE.moving) {
       els.currentHint.textContent = 'Use ↑ ↓ para mover • OK solta • Voltar cancela';
@@ -565,7 +592,10 @@
       return;
     }
     var tabName = tab.getAttribute('data-tab');
-    var index = tabName === 'appearance' ? 1 : (tabName === 'weather' ? 2 : 0);
+    var index = TABS.indexOf(tabName);
+    if (index < 0) {
+      index = 0;
+    }
     if (STATE.settingsZone !== 'tabs' || STATE.tabIndex !== index) {
       STATE.settingsZone = 'tabs';
       STATE.tabIndex = index;
@@ -638,6 +668,46 @@
     activateWeatherRow();
   }
 
+  function onNewsHover(event) {
+    if (STATE.moving || STATE.settingsTab !== 'news' || Date.now() < store.hoverLockUntil || !App.pointer.pointerActive()) {
+      return;
+    }
+    var row = App.dom.closest(event.target, '[data-news-index]');
+    if (!row) {
+      return;
+    }
+    var index = Number(row.getAttribute('data-news-index'));
+    if (STATE.settingsZone !== 'news' || STATE.newsSettingsIndex !== index) {
+      STATE.settingsZone = 'news';
+      STATE.newsSettingsIndex = index;
+      refreshSettingsFocus();
+    }
+  }
+
+  function onNewsClick(event) {
+    if (STATE.moving || STATE.settingsTab !== 'news') {
+      return;
+    }
+    var row = App.dom.closest(event.target, '[data-news-index]');
+    if (!row) {
+      return;
+    }
+    if (event.target === els.newsFeedInput) {
+      STATE.settingsZone = 'news';
+      STATE.newsSettingsIndex = 0;
+      refreshSettingsFocus();
+      return;
+    }
+    STATE.settingsZone = 'news';
+    STATE.newsSettingsIndex = Number(row.getAttribute('data-news-index'));
+    refreshSettingsFocus();
+    activateNewsRow();
+  }
+
+  function activateNewsRow() {
+    App.news.activateNewsRow();
+  }
+
   function handleSettingsKey(code) {
     if (STATE.moving) {
       handleMoveKey(code);
@@ -673,7 +743,10 @@
         focusSettingsContent();
       } else if (code === KEY.LEFT) {
         STATE.settingsZone = 'tabs';
-        STATE.tabIndex = STATE.settingsTab === 'appearance' ? 1 : (STATE.settingsTab === 'weather' ? 2 : 0);
+        STATE.tabIndex = TABS.indexOf(STATE.settingsTab);
+        if (STATE.tabIndex < 0) {
+          STATE.tabIndex = 0;
+        }
         refreshSettingsFocus();
       } else if (code === KEY.ENTER) {
         closeSettings();
@@ -780,6 +853,28 @@
         STATE.tabIndex = 2;
       } else if (code === KEY.ENTER) {
         activateWeatherRow();
+      }
+      refreshSettingsFocus();
+      return;
+    }
+
+    if (STATE.settingsZone === 'news') {
+      if (code === KEY.UP) {
+        if (STATE.newsSettingsIndex > 0) {
+          STATE.newsSettingsIndex -= 1;
+        } else {
+          STATE.settingsZone = 'tabs';
+          STATE.tabIndex = 3;
+        }
+      } else if (code === KEY.DOWN) {
+        if (STATE.newsSettingsIndex < 2) {
+          STATE.newsSettingsIndex += 1;
+        }
+      } else if (code === KEY.LEFT) {
+        STATE.settingsZone = 'tabs';
+        STATE.tabIndex = 3;
+      } else if (code === KEY.ENTER) {
+        App.news.activateNewsRow();
       }
       refreshSettingsFocus();
     }
@@ -938,6 +1033,7 @@
     renderWallpaperList: renderWallpaperList,
     refreshWallpaperFocus: refreshWallpaperFocus,
     refreshWeatherFocus: refreshWeatherFocus,
+    refreshNewsFocus: refreshNewsFocus,
     renderSettings: renderSettings,
     buildAddItems: buildAddItems,
     renderCurrentList: renderCurrentList,
@@ -954,6 +1050,8 @@
     onWallpaperClick: onWallpaperClick,
     onWeatherHover: onWeatherHover,
     onWeatherClick: onWeatherClick,
+    onNewsHover: onNewsHover,
+    onNewsClick: onNewsClick,
     activateWeatherRow: activateWeatherRow,
     handleSettingsKey: handleSettingsKey,
     handleMoveKey: handleMoveKey,

@@ -21,6 +21,7 @@
     STATE.appsFocus = true;
     STATE.gearFocus = false;
     STATE.emptyFocus = false;
+    STATE.newsFocus = false;
     els.allapps.classList.add('open');
     els.allapps.setAttribute('aria-hidden', 'false');
     els.hint.classList.remove('visible');
