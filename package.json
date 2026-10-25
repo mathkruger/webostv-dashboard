@@ -6,7 +6,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "install:tv": "node scripts/install.mjs",
-    "deploy": "npm run build && npm run install:tv"
+    "deploy": "npm run build && npm run install:tv",
+    "serve": "serve ./app"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@fontsource/inter": "^5.3.0",
-    "@webos-tools/cli": "^3.2.6"
+    "@webos-tools/cli": "^3.2.6",
+    "serve": "^14.2.6"
   }
 }
