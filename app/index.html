@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="wallpaper" class="wallpaper" aria-hidden="true"></div>
+    <div class="ambient"></div>
+
+    <header id="topbar">
+      <div class="topbar-left">
+        <div class="clock">
+          <div id="time">--:--</div>
+          <div id="date"></div>
+        </div>
+        <div id="weather" class="weather hidden" aria-hidden="true">
+          <div id="weather-icon" class="weather-icon" aria-hidden="true"></div>
+          <div class="weather-info">
+            <div id="weather-temp" class="weather-temp">--°</div>
+            <div id="weather-desc" class="weather-desc">Sem dados</div>
+            <div id="weather-city" class="weather-city"></div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="apps-button" class="apps-button" type="button" aria-label="Todos os apps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="7" height="7" rx="1.6"></rect>
+            <rect x="13.5" y="3.5" width="7" height="7" rx="1.6"></rect>
+            <rect x="3.5" y="13.5" width="7" height="7" rx="1.6"></rect>
+            <rect x="13.5" y="13.5" width="7" height="7" rx="1.6"></rect>
+          </svg>
+          <span>Todos os apps</span>
+        </button>
+        <button id="settings-button" class="icon-button" type="button" aria-label="Ajustes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.2"></circle>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.7 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.7a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.1 4.7a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.3 9c.26.62.86 1.03 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="home">
+      <div id="empty" class="empty-state">
+        <div class="empty-title">Sua tela inicial está vazia</div>
+        <div class="empty-text">Adicione seus aplicativos favoritos.</div>
+        <button id="empty-action" class="empty-action" type="button">Adicionar atalhos</button>
+      </div>
+      <div id="grid" class="grid"></div>
+    </main>
+
+    <div id="hint" class="hint">Voltar abre os ajustes</div>
+    <div id="toast" class="toast"></div>
+
+    <section id="settings" class="settings" aria-hidden="true">
+      <header class="settings-head">
+        <div>
+          <h1>Ajustes</h1>
+          <p>Personalize sua tela inicial.</p>
+        </div>
+        <button id="settings-done" class="done-button" type="button">Concluir</button>
+      </header>
+
+      <nav id="settings-tabs" class="settings-tabs" aria-label="Seções dos ajustes">
+        <button class="settings-tab active" type="button" data-tab="shortcuts">Atalhos</button>
+        <button class="settings-tab" type="button" data-tab="appearance">Aparência</button>
+        <button class="settings-tab" type="button" data-tab="weather">Clima</button>
+      </nav>
+
+      <div id="settings-body-shortcuts" class="settings-body">
+        <section class="pane current-pane">
+          <div class="pane-head">
+            <h2>Na tela inicial</h2>
+            <span id="current-count" class="count"></span>
+          </div>
+          <div id="current-list" class="list"></div>
+          <div id="current-hint" class="pane-hint">OK move o atalho</div>
+        </section>
+
+        <section class="pane add-pane">
+          <div class="pane-head">
+            <h2>Adicionar</h2>
+          </div>
+          <div id="add-list" class="list"></div>
+        </section>
+      </div>
+
+      <div id="settings-body-appearance" class="settings-body appearance-body hidden">
+        <section class="pane appearance-pane">
+          <div class="pane-head">
+            <h2>Papel de parede</h2>
+            <span id="wallpaper-current" class="count"></span>
+          </div>
+          <div id="wallpaper-grid" class="wallpaper-grid"></div>
+          <div class="pane-hint">OK aplica • Aleatório troca a cada abertura do app</div>
+        </section>
+      </div>
+
+      <div id="settings-body-weather" class="settings-body weather-body hidden">
+        <section class="pane weather-pane">
+          <div class="pane-head">
+            <h2>Previsão do tempo</h2>
+            <span id="weather-status" class="count">Desativado</span>
+          </div>
+          <div id="weather-settings-list" class="list weather-settings-list">
+            <div class="row" data-weather-index="0">
+              <div class="row-icon">
+                <svg class="row-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="8.8" cy="8.8" r="3.1"></circle>
+                  <path d="M8.8 2.7v1.7M2.7 8.8H4.4M4.5 4.5l1.2 1.2M13.1 4.5l-1.2 1.2M4.5 13.1l1.2-1.2"></path>
+                  <path d="M10 19.4h7.7a3 3 0 0 0 .3-6 4.3 4.3 0 0 0-8.2 1.2 2.4 2.4 0 0 0 .2 4.8z"></path>
+                </svg>
+              </div>
+              <div class="row-title">Mostrar previsão do tempo</div>
+              <div id="weather-toggle-meta" class="row-meta">Desligado</div>
+              <div id="weather-toggle-switch" class="switch"></div>
+            </div>
+            <div class="row weather-city-row" data-weather-index="1">
+              <div class="row-icon">
+                <svg class="row-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 21s6.5-5.4 6.5-10.4A6.5 6.5 0 0 0 5.5 10.6C5.5 15.6 12 21 12 21z"></path>
+                  <circle cx="12" cy="10.5" r="2.3"></circle>
+                </svg>
+              </div>
+              <div class="row-title">Cidade</div>
+              <input id="weather-city-input" class="weather-input" type="text" placeholder="Ex.: São Paulo" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="row" data-weather-index="2">
+              <div class="row-icon">
+                <svg class="row-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 11a8 8 0 1 0-2.3 6.7"></path>
+                  <path d="M20 5v6h-6"></path>
+                </svg>
+              </div>
+              <div class="row-title">Atualizar agora</div>
+              <div id="weather-refresh-meta" class="row-meta">Agora</div>
+            </div>
+          </div>
+          <div id="weather-city-meta" class="weather-city-meta"></div>
+          <div id="weather-hint" class="pane-hint">A previsão é atualizada a cada 15 minutos</div>
+        </section>
+      </div>
+
+      <footer class="settings-foot">
+        <span id="status-text" class="status-text">Pronto</span>
+        <span class="brand">Dashboard</span>
+      </footer>
+    </section>
+
+    <section id="allapps" class="settings allapps" aria-hidden="true">
+      <header class="settings-head">
+        <div>
+          <h1>Todos os apps</h1>
+          <p>Aplicativos e entradas disponíveis na TV.</p>
+        </div>
+        <button id="allapps-done" class="done-button" type="button">Fechar</button>
+      </header>
+
+      <div class="settings-body">
+        <section class="pane all-pane">
+          <div class="pane-head">
+            <h2>Apps e fontes</h2>
+            <span id="allapps-count" class="count"></span>
+          </div>
+          <div id="allapps-list" class="list"></div>
+        </section>
+      </div>
+
+      <footer class="settings-foot">
+        <span id="allapps-status" class="status-text">OK abre o app selecionado</span>
+        <span class="brand">Dashboard</span>
+      </footer>
+    </section>
+  </div>
+
+  <script src="webOSTVjs-1.2.13/webOSTV.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/core/constants.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/services/scripts.js"></script>
+  <script src="js/core/utils.js"></script>
+  <script src="js/core/dom.js"></script>
+  <script src="js/core/pointer.js"></script>
+  <script src="js/core/clock.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/core/glyphs.js"></script>
+  <script src="js/services/luna.js"></script>
+  <script src="js/services/shortcuts.js"></script>
+  <script src="js/services/wallpaper.js"></script>
+  <script src="js/services/weather.js"></script>
+  <script src="js/services/icons.js"></script>
+  <script src="js/services/catalog.js"></script>
+  <script src="js/services/launcher.js"></script>
+  <script src="js/services/autostart.js"></script>
+  <script src="js/services/return-watch.js"></script>
+  <script src="js/pages/home.js"></script>
+  <script src="js/pages/allapps.js"></script>
+  <script src="js/pages/settings.js"></script>
+  <script src="js/core/keyboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

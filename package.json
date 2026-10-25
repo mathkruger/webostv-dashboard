@@ -1,0 +1,19 @@
+{
+  "name": "webos-launcher",
+  "version": "1.0.0",
+  "description": "Dashboard para TV LG webOS",
+  "main": "index.js",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "install:tv": "node scripts/install.mjs",
+    "deploy": "npm run build && npm run install:tv"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@webos-tools/cli": "^3.2.6"
+  }
+}

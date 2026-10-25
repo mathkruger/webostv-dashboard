@@ -1,0 +1,8 @@
+{
+  "tvIp": "192.168.15.9",
+  "cdpPort": 9998,
+  "httpPort": 8124,
+  "localIp": "",
+  "installerAppId": "org.webosbrew.hbchannel",
+  "launchAfterInstall": true
+}
