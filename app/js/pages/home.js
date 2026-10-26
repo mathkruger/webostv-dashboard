@@ -19,6 +19,7 @@
       STATE.gearFocus = false;
       STATE.appsFocus = false;
       STATE.newsFocus = false;
+      STATE.weatherFocus = false;
       refreshHomeFocus();
       return;
     }
@@ -60,14 +61,17 @@
     var tiles = els.grid.children;
     for (var i = 0; i < tiles.length; i += 1) {
       var tile = tiles[i];
-      var focused = !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus && !STATE.newsFocus && Number(tile.getAttribute('data-index')) === STATE.homeFocus;
+      var focused = !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus && !STATE.newsFocus && !STATE.weatherFocus && Number(tile.getAttribute('data-index')) === STATE.homeFocus;
       tile.classList.toggle('focused', focused);
     }
     els.settingsButton.classList.toggle('focused', STATE.gearFocus);
     els.appsButton.classList.toggle('focused', STATE.appsFocus);
-    els.emptyAction.classList.toggle('focused', STATE.emptyFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.newsFocus);
+    els.emptyAction.classList.toggle('focused', STATE.emptyFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.newsFocus && !STATE.weatherFocus);
     if (els.news) {
-      els.news.classList.toggle('focused', STATE.newsFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus);
+      els.news.classList.toggle('focused', STATE.newsFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus && !STATE.weatherFocus);
+    }
+    if (els.weather) {
+      els.weather.classList.toggle('focused', STATE.weatherFocus && !STATE.gearFocus && !STATE.appsFocus && !STATE.emptyFocus && !STATE.newsFocus);
     }
   }
 
@@ -80,12 +84,13 @@
       return;
     }
     var index = Number(tile.getAttribute('data-index'));
-    if (STATE.homeFocus !== index || STATE.gearFocus || STATE.appsFocus || STATE.newsFocus) {
+    if (STATE.homeFocus !== index || STATE.gearFocus || STATE.appsFocus || STATE.newsFocus || STATE.weatherFocus) {
       STATE.homeFocus = index;
       STATE.gearFocus = false;
       STATE.appsFocus = false;
       STATE.emptyFocus = false;
       STATE.newsFocus = false;
+      STATE.weatherFocus = false;
       refreshHomeFocus();
     }
   }
@@ -103,6 +108,7 @@
     STATE.gearFocus = false;
     STATE.appsFocus = false;
     STATE.newsFocus = false;
+    STATE.weatherFocus = false;
     refreshHomeFocus();
     App.launcher.launchShortcut(STATE.shortcuts[index], tile);
   }
@@ -113,11 +119,14 @@
 
   function homeItems() {
     var items = homeTiles();
-    items.push(els.news, els.appsButton, els.settingsButton, els.emptyAction);
+    items.push(els.weather, els.news, els.appsButton, els.settingsButton, els.emptyAction);
     return items;
   }
 
   function homeCurrent() {
+    if (STATE.weatherFocus) {
+      return els.weather;
+    }
     if (STATE.newsFocus) {
       return els.news;
     }
@@ -134,6 +143,7 @@
   }
 
   function homeFocusElement(element) {
+    STATE.weatherFocus = element === els.weather;
     STATE.newsFocus = element === els.news;
     STATE.appsFocus = element === els.appsButton;
     STATE.gearFocus = element === els.settingsButton;
@@ -160,7 +170,7 @@
       }
     }
     if (!STATE.shortcuts.length && code === KEY.DOWN &&
-      (current === els.news || current === els.appsButton || current === els.settingsButton)) {
+      (current === els.news || current === els.appsButton || current === els.settingsButton || current === els.weather)) {
       homeFocusElement(els.emptyAction);
       return true;
     }

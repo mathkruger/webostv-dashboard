@@ -141,6 +141,14 @@ button {
   border-radius: 1.5vh;
   background: rgba(255, 255, 255, 0.045);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  text-align: left;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.weather.focused {
+  background: rgba(255, 255, 255, 0.13);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+  transform: scale(1.015);
 }
 
 .weather-icon {
@@ -813,6 +821,243 @@ button {
 
 .news-item .row-meta {
   font-size: 0.95vw;
+}
+
+.weather-page {
+  z-index: 24;
+}
+
+.weather-hero {
+  display: flex;
+  align-items: center;
+  margin-top: 3vh;
+  padding: 2.4vh 2.2vw;
+  border-radius: 2vh;
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.weather-hero-icon {
+  flex: 0 0 auto;
+  width: 7vw;
+  height: 7vw;
+  min-width: 62px;
+  min-height: 62px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.weather-hero-icon svg,
+.weather-day-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.weather-hero-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: 1.8vw;
+}
+
+.weather-hero-temp {
+  font-size: 5.8vw;
+  font-weight: 600;
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-hero-desc {
+  margin-top: 1.1vh;
+  color: #ffffff;
+  font-size: 1.5vw;
+  font-weight: 600;
+}
+
+.weather-hero-meta {
+  margin-top: 0.6vh;
+  color: var(--muted);
+  font-size: 1.05vw;
+}
+
+.weather-hero-stats {
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: 2vw;
+}
+
+.weather-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 10.5vw;
+  padding: 1.8vh 1.5vw;
+  border-radius: 1.4vh;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.weather-stat + .weather-stat {
+  margin-left: 1vw;
+}
+
+.weather-stat-label {
+  color: var(--faint);
+  font-size: 0.88vw;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weather-stat-value {
+  margin-top: 0.9vh;
+  font-size: 1.9vw;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-days-head {
+  margin-top: 2.8vh;
+  margin-bottom: 1.2vh;
+}
+
+.weather-days-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.weather-days-pane {
+  flex: 1;
+  width: 100%;
+}
+
+.weather-days-list {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  gap: 1.1vh 1.1vw;
+  min-height: 0;
+  padding-right: 0.4vw;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.weather-day-card {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-height: 12.5vh;
+  padding: 1.2vh 1vw;
+  border-radius: 1.3vh;
+  background: var(--panel);
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.weather-day-top,
+.weather-day-main,
+.weather-day-stats {
+  flex: 0 0 auto;
+}
+
+.weather-day-card.focused {
+  background: var(--panel-focus);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+  transform: scale(1.02);
+}
+
+.weather-day-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.weather-day-name {
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 1.02vw;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weather-day-date {
+  margin-left: 0.4vw;
+  color: var(--faint);
+  font-size: 0.88vw;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.weather-day-icon {
+  flex: 0 0 auto;
+  width: 3.4vh;
+  height: 3.4vh;
+  min-width: 26px;
+  min-height: 26px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.weather-day-main {
+  display: flex;
+  align-items: center;
+  margin-top: 1vh;
+}
+
+.weather-day-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 0.8vw;
+}
+
+.weather-day-condition {
+  margin-top: 0.35vh;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.92vw;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weather-day-temps {
+  display: flex;
+  align-items: baseline;
+}
+
+.weather-day-high {
+  font-size: 1.5vw;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-day-low {
+  margin-left: 0.5vw;
+  color: var(--muted);
+  font-size: 1.2vw;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-day-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.8vh;
+  padding-top: 0.8vh;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--faint);
+  font-size: 0.85vw;
+}
+
+.weather-day-stat {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.weather-day-glyph {
+  width: 1.5vh;
+  height: 1.5vh;
+  min-width: 12px;
+  min-height: 12px;
+  margin-right: 0.3vw;
 }
 
 .wallpaper-list {

@@ -20,6 +20,8 @@
     isDay: true,
     high: null,
     low: null,
+    currentWind: null,
+    days: [],
     updatedAt: 0,
     loading: false,
     error: '',
@@ -32,6 +34,7 @@
   var retryDelay = 5000;
   var uiBound = false;
   var useHttp = false;
+  var weatherRows = [];
 
   var ICONS = {
     clear: '<circle cx="12" cy="12" r="4.1"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/>',
@@ -108,6 +111,37 @@
     return typeof value === 'number' && isFinite(value);
   }
 
+  function normalizeDay(entry) {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+    if (typeof entry.date !== 'string' || !entry.date) {
+      return null;
+    }
+    return {
+      date: entry.date,
+      code: isFiniteNumber(entry.code) ? entry.code : null,
+      high: isFiniteNumber(entry.high) ? Math.round(entry.high) : null,
+      low: isFiniteNumber(entry.low) ? Math.round(entry.low) : null,
+      rain: isFiniteNumber(entry.rain) ? Math.round(entry.rain) : null,
+      wind: isFiniteNumber(entry.wind) ? Math.round(entry.wind) : null
+    };
+  }
+
+  function normalizeDays(list) {
+    var days = [];
+    if (!list || !list.length) {
+      return days;
+    }
+    for (var i = 0; i < list.length; i += 1) {
+      var day = normalizeDay(list[i]);
+      if (day) {
+        days.push(day);
+      }
+    }
+    return days;
+  }
+
   function loadState() {
     var stored = readJson(CONFIG.weatherStorageKey);
     if (!stored || typeof stored !== 'object') {
@@ -161,6 +195,8 @@
       weather.isDay = cache.isDay !== false;
       weather.high = isFiniteNumber(cache.high) ? Math.round(cache.high) : null;
       weather.low = isFiniteNumber(cache.low) ? Math.round(cache.low) : null;
+      weather.currentWind = isFiniteNumber(cache.currentWind) ? Math.round(cache.currentWind) : null;
+      weather.days = normalizeDays(cache.days);
       weather.updatedAt = isFiniteNumber(cache.updatedAt) ? cache.updatedAt : 0;
     }
   }
@@ -177,6 +213,8 @@
       isDay: weather.isDay,
       high: weather.high,
       low: weather.low,
+      currentWind: weather.currentWind,
+      days: weather.days,
       updatedAt: weather.updatedAt
     });
   }
@@ -399,6 +437,243 @@
     els.weatherIcon.appendChild(iconNode(category));
   }
 
+  var WEEKDAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+  function parseDayDate(value) {
+    var parts = String(value || '').split('-');
+    if (parts.length !== 3) {
+      return null;
+    }
+    var date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date;
+  }
+
+  function dayNameFor(day, index) {
+    if (index === 0) {
+      return 'Hoje';
+    }
+    if (index === 1) {
+      return 'Amanhã';
+    }
+    var date = parseDayDate(day.date);
+    return date ? WEEKDAYS[date.getDay()] : '';
+  }
+
+  function dayDateFor(day) {
+    var date = parseDayDate(day.date);
+    if (!date) {
+      return '';
+    }
+    return App.utils.pad(date.getDate()) + '/' + App.utils.pad(date.getMonth() + 1);
+  }
+
+  function statGlyph(kind) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('class', 'weather-day-glyph');
+    if (kind === 'wind') {
+      svg.innerHTML = '<path d="M4 8h9a2.5 2.5 0 1 0-2.4-3.2"/><path d="M4 12h13a2.5 2.5 0 1 1-2.4 3.2"/><path d="M4 16h6"/>';
+    } else {
+      svg.innerHTML = '<path d="M12 3.5c3.2 4 5.2 6.4 5.2 9a5.2 5.2 0 0 1-10.4 0c0-2.6 2-5 5.2-9z"/>';
+    }
+    return svg;
+  }
+
+  function formatPercent(value) {
+    return isFiniteNumber(value) ? Math.round(value) + '%' : '--';
+  }
+
+  function formatWind(value) {
+    return isFiniteNumber(value) ? Math.round(value) + ' km/h' : '--';
+  }
+
+  function buildWeatherDays() {
+    weatherRows = [];
+    if (!els.weatherDaysList) {
+      return;
+    }
+    els.weatherDaysList.innerHTML = '';
+
+    if (!weather.days.length) {
+      var empty = document.createElement('div');
+      empty.className = 'loading-row';
+      if (weather.loading) {
+        var spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        empty.appendChild(spinner);
+        empty.appendChild(document.createTextNode('Carregando previsão'));
+      } else {
+        empty.textContent = weather.error || 'Nenhuma previsão disponível';
+      }
+      els.weatherDaysList.appendChild(empty);
+      return;
+    }
+
+    weather.days.forEach(function (day, index) {
+      var card = document.createElement('div');
+      card.className = 'weather-day-card';
+      card.setAttribute('data-weather-day', String(index));
+
+      var top = document.createElement('div');
+      top.className = 'weather-day-top';
+
+      var name = document.createElement('span');
+      name.className = 'weather-day-name';
+      name.textContent = dayNameFor(day, index);
+
+      var date = document.createElement('span');
+      date.className = 'weather-day-date';
+      date.textContent = dayDateFor(day);
+
+      top.appendChild(name);
+      top.appendChild(date);
+
+      var dayIcon = document.createElement('div');
+      dayIcon.className = 'weather-day-icon';
+      dayIcon.setAttribute('aria-hidden', 'true');
+      dayIcon.appendChild(iconNode(categoryFor(day.code, true)));
+
+      var condition = document.createElement('div');
+      condition.className = 'weather-day-condition';
+      condition.textContent = labelFor(day.code);
+
+      var temps = document.createElement('div');
+      temps.className = 'weather-day-temps';
+
+      var high = document.createElement('span');
+      high.className = 'weather-day-high';
+      high.textContent = isFiniteNumber(day.high) ? day.high + '°' : '--°';
+
+      var low = document.createElement('span');
+      low.className = 'weather-day-low';
+      low.textContent = isFiniteNumber(day.low) ? day.low + '°' : '--°';
+
+      temps.appendChild(high);
+      temps.appendChild(low);
+
+      var info = document.createElement('div');
+      info.className = 'weather-day-info';
+      info.appendChild(temps);
+      info.appendChild(condition);
+
+      var main = document.createElement('div');
+      main.className = 'weather-day-main';
+      main.appendChild(dayIcon);
+      main.appendChild(info);
+
+      var stats = document.createElement('div');
+      stats.className = 'weather-day-stats';
+
+      var rain = document.createElement('span');
+      rain.className = 'weather-day-stat';
+      rain.appendChild(statGlyph('rain'));
+      rain.appendChild(document.createTextNode(formatPercent(day.rain)));
+
+      var wind = document.createElement('span');
+      wind.className = 'weather-day-stat';
+      wind.appendChild(statGlyph('wind'));
+      wind.appendChild(document.createTextNode(formatWind(day.wind)));
+
+      stats.appendChild(rain);
+      stats.appendChild(wind);
+
+      card.appendChild(top);
+      card.appendChild(main);
+      card.appendChild(stats);
+      els.weatherDaysList.appendChild(card);
+      weatherRows.push(card);
+    });
+  }
+
+  function refreshWeatherPageFocus() {
+    if (!STATE.weatherOpen) {
+      return;
+    }
+    if (els.weatherDone) {
+      els.weatherDone.classList.toggle('focused', STATE.weatherZone === 'done');
+    }
+    weatherRows.forEach(function (card, index) {
+      var focused = STATE.weatherZone === 'days' && index === STATE.weatherIndex;
+      card.classList.toggle('focused', focused);
+      if (focused) {
+        App.dom.scrollRowIntoView(els.weatherDaysList, card);
+      }
+    });
+  }
+
+  function renderWeatherPage() {
+    if (!STATE.weatherOpen || !els.weatherPage) {
+      return;
+    }
+    if (els.weatherPageCity) {
+      els.weatherPageCity.textContent = weather.resolvedName ||
+        (weather.city ? weather.city : 'Cidade não definida');
+    }
+
+    if (els.weatherHeroIcon) {
+      els.weatherHeroIcon.innerHTML = '';
+      var category = weather.temperature === null
+        ? 'cloudy'
+        : categoryFor(weather.weatherCode, weather.isDay);
+      els.weatherHeroIcon.appendChild(iconNode(category));
+    }
+
+    var today = weather.days.length ? weather.days[0] : null;
+
+    if (weather.temperature === null) {
+      els.weatherHeroTemp.textContent = '--°';
+      els.weatherHeroDesc.textContent = weather.loading ? 'Carregando' : (weather.error ? 'Indisponível' : 'Sem dados');
+      els.weatherHeroMeta.textContent = '';
+      els.weatherHeroRain.textContent = '--%';
+      els.weatherHeroWind.textContent = '--';
+    } else {
+      els.weatherHeroTemp.textContent = weather.temperature + '°';
+      els.weatherHeroDesc.textContent = labelFor(weather.weatherCode);
+      var meta = [];
+      if (isFiniteNumber(weather.high) && isFiniteNumber(weather.low)) {
+        meta.push('Máx ' + weather.high + '°');
+        meta.push('Mín ' + weather.low + '°');
+      }
+      if (weather.updatedAt) {
+        meta.push('Atualizado ' + timeAgo(weather.updatedAt).toLowerCase());
+      }
+      els.weatherHeroMeta.textContent = meta.join(' · ');
+      els.weatherHeroRain.textContent = formatPercent(today ? today.rain : null);
+      els.weatherHeroWind.textContent = formatWind(weather.currentWind);
+    }
+
+    if (els.weatherPageUpdated) {
+      els.weatherPageUpdated.textContent = weather.days.length
+        ? weather.days.length + (weather.days.length === 1 ? ' dia' : ' dias')
+        : '';
+    }
+
+    if (els.weatherPageStatus) {
+      if (weather.loading) {
+        els.weatherPageStatus.textContent = 'Atualizando previsão…';
+      } else if (weather.error) {
+        els.weatherPageStatus.textContent = weather.error + ' • Voltar fecha';
+      } else {
+        els.weatherPageStatus.textContent = 'Use as setas para navegar • Voltar fecha';
+      }
+      els.weatherPageStatus.classList.toggle('error', !!weather.error);
+    }
+
+    buildWeatherDays();
+    if (STATE.weatherZone === 'days' && STATE.weatherIndex >= weatherRows.length) {
+      STATE.weatherIndex = Math.max(0, weatherRows.length - 1);
+    }
+    refreshWeatherPageFocus();
+  }
+
   function renderWeather() {
     if (!els.weather) {
       return;
@@ -531,6 +806,7 @@
       clearRetry();
     }
     renderWeather();
+    renderWeatherPage();
     renderWeatherSettings();
   }
 
@@ -538,9 +814,9 @@
     var url = CONFIG.weatherForecastUrl +
       '?latitude=' + encodeURIComponent(weather.latitude) +
       '&longitude=' + encodeURIComponent(weather.longitude) +
-      '&current=temperature_2m,weather_code,is_day' +
-      '&daily=temperature_2m_max,temperature_2m_min' +
-      '&forecast_days=1&timezone=auto';
+      '&current=temperature_2m,weather_code,is_day,wind_speed_10m' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max' +
+      '&forecast_days=15&timezone=auto';
     requestJson(url, function (error, data) {
       if (token !== requestId) {
         return;
@@ -557,13 +833,27 @@
       weather.temperature = Math.round(current.temperature_2m);
       weather.weatherCode = isFiniteNumber(current.weather_code) ? current.weather_code : null;
       weather.isDay = current.is_day !== 0;
+      weather.currentWind = isFiniteNumber(current.wind_speed_10m) ? Math.round(current.wind_speed_10m) : null;
       weather.high = null;
       weather.low = null;
-      if (data.daily && data.daily.temperature_2m_max && isFiniteNumber(data.daily.temperature_2m_max[0])) {
-        weather.high = Math.round(data.daily.temperature_2m_max[0]);
+      weather.days = [];
+      var daily = data.daily;
+      if (daily && daily.time && daily.time.length) {
+        for (var i = 0; i < daily.time.length && i < 15; i += 1) {
+          var day = {
+            date: daily.time[i],
+            code: daily.weather_code && isFiniteNumber(daily.weather_code[i]) ? daily.weather_code[i] : null,
+            high: daily.temperature_2m_max && isFiniteNumber(daily.temperature_2m_max[i]) ? daily.temperature_2m_max[i] : null,
+            low: daily.temperature_2m_min && isFiniteNumber(daily.temperature_2m_min[i]) ? daily.temperature_2m_min[i] : null,
+            rain: daily.precipitation_probability_max && isFiniteNumber(daily.precipitation_probability_max[i]) ? daily.precipitation_probability_max[i] : null,
+            wind: daily.wind_speed_10m_max && isFiniteNumber(daily.wind_speed_10m_max[i]) ? daily.wind_speed_10m_max[i] : null
+          };
+          weather.days.push(normalizeDay(day));
+        }
       }
-      if (data.daily && data.daily.temperature_2m_min && isFiniteNumber(data.daily.temperature_2m_min[0])) {
-        weather.low = Math.round(data.daily.temperature_2m_min[0]);
+      if (weather.days.length) {
+        weather.high = weather.days[0].high;
+        weather.low = weather.days[0].low;
       }
       weather.updatedAt = Date.now();
       weather.loading = false;
@@ -572,6 +862,7 @@
       clearRetry();
       saveCache();
       renderWeather();
+      renderWeatherPage();
       renderWeatherSettings();
     });
   }
@@ -579,6 +870,7 @@
   function refreshWeather(force) {
     if (!weather.enabled) {
       renderWeather();
+      renderWeatherPage();
       return;
     }
     if (!weather.city) {
@@ -591,9 +883,11 @@
     var now = Date.now();
     if (!force && weather.updatedAt && now - weather.updatedAt < CONFIG.weatherRefreshInterval) {
       renderWeather();
+      renderWeatherPage();
       return;
     }
     if (!force && weather.lastAttempt && now - weather.lastAttempt < 30000) {
+      renderWeatherPage();
       return;
     }
 
@@ -603,6 +897,7 @@
     var token = requestId + 1;
     requestId = token;
     renderWeather();
+    renderWeatherPage();
     renderWeatherSettings();
 
     if (weather.latitude === null || weather.longitude === null) {
@@ -637,6 +932,7 @@
     } else {
       clearRetry();
       renderWeather();
+      renderWeatherPage();
     }
     renderWeatherSettings();
     App.ui.toast(weather.enabled ? 'Previsão do tempo ativada' : 'Previsão do tempo desativada');
@@ -663,6 +959,8 @@
     weather.weatherCode = null;
     weather.high = null;
     weather.low = null;
+    weather.currentWind = null;
+    weather.days = [];
     weather.updatedAt = 0;
     weather.error = '';
     weather.loading = false;
@@ -672,6 +970,7 @@
     clearCache();
     saveState();
     renderWeather();
+    renderWeatherPage();
     if (weather.enabled) {
       App.ui.toast('Buscando clima em ' + city);
       refreshWeather(true);
@@ -766,6 +1065,148 @@
     }, false);
   }
 
+  function openWeather() {
+    if (STATE.weatherOpen) {
+      return;
+    }
+    if (!weather.enabled) {
+      App.ui.toast('Previsão do tempo desativada');
+      return;
+    }
+    if (STATE.settingsOpen) {
+      App.settings.closeSettings();
+    }
+    if (STATE.allOpen) {
+      App.allApps.closeAllApps();
+    }
+    if (STATE.newsOpen) {
+      App.news.closeNews();
+    }
+    STATE.weatherOpen = true;
+    STATE.screen = 'weather';
+    STATE.weatherFocus = false;
+    STATE.gearFocus = false;
+    STATE.appsFocus = false;
+    STATE.emptyFocus = false;
+    STATE.newsFocus = false;
+    STATE.weatherZone = 'days';
+    STATE.weatherIndex = 0;
+    els.weatherPage.classList.add('open');
+    els.weatherPage.setAttribute('aria-hidden', 'false');
+    els.hint.classList.remove('visible');
+    store.hoverLockUntil = Date.now() + 450;
+    renderWeatherPage();
+    refreshWeather(!weather.days.length);
+  }
+
+  function closeWeather() {
+    if (!STATE.weatherOpen) {
+      return;
+    }
+    STATE.weatherOpen = false;
+    STATE.screen = 'home';
+    STATE.weatherFocus = true;
+    els.weatherPage.classList.remove('open');
+    els.weatherPage.setAttribute('aria-hidden', 'true');
+    App.home.refreshHomeFocus();
+  }
+
+  function weatherItems() {
+    return [els.weatherDone].concat(weatherRows);
+  }
+
+  function weatherCurrent() {
+    if (STATE.weatherZone === 'done') {
+      return els.weatherDone;
+    }
+    return weatherRows[STATE.weatherIndex] || null;
+  }
+
+  function weatherFocusElement(element) {
+    if (element === els.weatherDone) {
+      STATE.weatherZone = 'done';
+    } else {
+      var index = Number(element.getAttribute('data-weather-day'));
+      STATE.weatherZone = 'days';
+      STATE.weatherIndex = isNaN(index) ? 0 : index;
+    }
+    refreshWeatherPageFocus();
+  }
+
+  function weatherKey(code) {
+    if (STATE.weatherZone === 'done' && code === KEY.DOWN) {
+      STATE.weatherZone = 'days';
+      STATE.weatherIndex = 0;
+      refreshWeatherPageFocus();
+      return true;
+    }
+    if (STATE.weatherZone === 'days' && code === KEY.UP && STATE.weatherIndex < 5) {
+      STATE.weatherZone = 'done';
+      refreshWeatherPageFocus();
+      return true;
+    }
+    return false;
+  }
+
+  function onWeatherCardClick(event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    openWeather();
+  }
+
+  function onWeatherCardHover() {
+    STATE.weatherFocus = true;
+    STATE.gearFocus = false;
+    STATE.appsFocus = false;
+    STATE.emptyFocus = false;
+    STATE.newsFocus = false;
+    App.home.refreshHomeFocus();
+  }
+
+  function onWeatherDoneClick() {
+    closeWeather();
+  }
+
+  function onWeatherDoneHover() {
+    if (Date.now() < store.hoverLockUntil || !App.pointer.pointerActive()) {
+      return;
+    }
+    STATE.weatherZone = 'done';
+    refreshWeatherPageFocus();
+  }
+
+  function onWeatherDayHover(event) {
+    if (Date.now() < store.hoverLockUntil || !App.pointer.pointerActive()) {
+      return;
+    }
+    var card = App.dom.closest(event.target, '[data-weather-day]');
+    if (!card) {
+      return;
+    }
+    var index = Number(card.getAttribute('data-weather-day'));
+    if (isNaN(index)) {
+      return;
+    }
+    STATE.weatherZone = 'days';
+    STATE.weatherIndex = index;
+    refreshWeatherPageFocus();
+  }
+
+  function onWeatherDayClick(event) {
+    var card = App.dom.closest(event.target, '[data-weather-day]');
+    if (!card) {
+      return;
+    }
+    var index = Number(card.getAttribute('data-weather-day'));
+    if (isNaN(index)) {
+      return;
+    }
+    STATE.weatherZone = 'days';
+    STATE.weatherIndex = index;
+    refreshWeatherPageFocus();
+  }
+
   function startWeather() {
     loadState();
     loadCache();
@@ -789,7 +1230,16 @@
     startWeather: startWeather,
     refreshWeather: refreshWeather,
     renderWeather: renderWeather,
+    renderWeatherPage: renderWeatherPage,
     renderWeatherSettings: renderWeatherSettings,
+    openWeather: openWeather,
+    closeWeather: closeWeather,
+    onWeatherCardClick: onWeatherCardClick,
+    onWeatherCardHover: onWeatherCardHover,
+    onWeatherDoneClick: onWeatherDoneClick,
+    onWeatherDoneHover: onWeatherDoneHover,
+    onWeatherDayHover: onWeatherDayHover,
+    onWeatherDayClick: onWeatherDayClick,
     setEnabled: setEnabled,
     setCity: setCity,
     startCityEdit: startCityEdit,
@@ -811,4 +1261,12 @@
       return weather.loading;
     }
   };
+
+  App.focus.register('weather', {
+    items: weatherItems,
+    current: weatherCurrent,
+    onFocus: weatherFocusElement,
+    onKey: weatherKey,
+    onBack: closeWeather
+  });
 })(window);

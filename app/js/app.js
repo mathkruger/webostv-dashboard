@@ -23,6 +23,9 @@
       if (STATE.newsOpen) {
         App.news.closeNews();
       }
+      if (STATE.weatherOpen) {
+        App.weather.closeWeather();
+      }
       App.returnWatch.ensureReturnWatcher(false);
       App.clock.updateClock();
       App.wallpaper.applyWallpaper();
@@ -40,6 +43,7 @@
       STATE.gearFocus = false;
       STATE.emptyFocus = false;
       STATE.newsFocus = false;
+      STATE.weatherFocus = false;
       App.home.refreshHomeFocus();
     }, false);
 
@@ -52,6 +56,7 @@
       STATE.appsFocus = false;
       STATE.emptyFocus = false;
       STATE.newsFocus = false;
+      STATE.weatherFocus = false;
       App.home.refreshHomeFocus();
     }, false);
 
@@ -68,6 +73,7 @@
       STATE.gearFocus = false;
       STATE.emptyFocus = true;
       STATE.newsFocus = false;
+      STATE.weatherFocus = false;
       App.home.refreshHomeFocus();
     }, false);
 
@@ -95,6 +101,13 @@
     els.weatherSettingsList.addEventListener('click', App.settings.onWeatherClick, false);
     els.newsSettingsList.addEventListener('mouseover', App.settings.onNewsHover, false);
     els.newsSettingsList.addEventListener('click', App.settings.onNewsClick, false);
+
+    els.weather.addEventListener('click', App.weather.onWeatherCardClick, false);
+    els.weather.addEventListener('mouseover', App.weather.onWeatherCardHover, false);
+    els.weatherDone.addEventListener('click', App.weather.onWeatherDoneClick, false);
+    els.weatherDone.addEventListener('mouseover', App.weather.onWeatherDoneHover, false);
+    els.weatherDaysList.addEventListener('mouseover', App.weather.onWeatherDayHover, false);
+    els.weatherDaysList.addEventListener('click', App.weather.onWeatherDayClick, false);
 
     els.news.addEventListener('click', App.news.onNewsCardClick, false);
     els.news.addEventListener('mouseover', App.news.onNewsCardHover, false);

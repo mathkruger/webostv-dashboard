@@ -21,6 +21,7 @@
     STATE.moving = null;
     STATE.appsFocus = false;
     STATE.newsFocus = false;
+    STATE.weatherFocus = false;
     STATE.settingsTab = 'shortcuts';
     STATE.tabIndex = 0;
     STATE.currentIndex = STATE.shortcuts.length ? App.utils.clamp(STATE.currentIndex, 0, STATE.shortcuts.length - 1) : 0;

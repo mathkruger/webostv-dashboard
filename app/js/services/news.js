@@ -741,6 +741,7 @@
     STATE.newsOpen = true;
     STATE.screen = 'news';
     STATE.newsFocus = false;
+    STATE.weatherFocus = false;
     STATE.gearFocus = false;
     STATE.appsFocus = false;
     STATE.emptyFocus = false;
@@ -877,6 +878,7 @@
     STATE.gearFocus = false;
     STATE.appsFocus = false;
     STATE.emptyFocus = false;
+    STATE.weatherFocus = false;
     App.home.refreshHomeFocus();
   }
 

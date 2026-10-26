@@ -17,14 +17,14 @@
           <div id="time">--:--</div>
           <div id="date"></div>
         </div>
-        <div id="weather" class="weather hidden" aria-hidden="true">
+        <button id="weather" class="weather hidden" type="button" aria-hidden="true" aria-label="Abrir previsão do tempo">
           <div id="weather-icon" class="weather-icon" aria-hidden="true"></div>
           <div class="weather-info">
             <div id="weather-temp" class="weather-temp">--°</div>
             <div id="weather-desc" class="weather-desc">Sem dados</div>
             <div id="weather-city" class="weather-city"></div>
           </div>
-        </div>
+        </button>
         <button id="news" class="news-card" type="button" aria-label="Abrir notícias">
           <div class="news-card-head">
             <span id="news-card-source" class="news-card-source">Notícias</span>
@@ -241,6 +241,51 @@
 
       <footer class="settings-foot">
         <span id="allapps-status" class="status-text">OK abre o app selecionado</span>
+        <span class="brand">Dashboard</span>
+      </footer>
+    </section>
+
+    <section id="weather-page" class="settings weather-page" aria-hidden="true">
+      <header class="settings-head">
+        <div>
+          <h1>Previsão do tempo</h1>
+          <p id="weather-page-city">Cidade</p>
+        </div>
+        <button id="weather-done" class="done-button" type="button">Fechar</button>
+      </header>
+
+      <div class="weather-hero">
+        <div id="weather-hero-icon" class="weather-hero-icon" aria-hidden="true"></div>
+        <div class="weather-hero-main">
+          <div id="weather-hero-temp" class="weather-hero-temp">--°</div>
+          <div id="weather-hero-desc" class="weather-hero-desc">Sem dados</div>
+          <div id="weather-hero-meta" class="weather-hero-meta"></div>
+        </div>
+        <div class="weather-hero-stats">
+          <div class="weather-stat">
+            <span class="weather-stat-label">Chuva hoje</span>
+            <span id="weather-hero-rain" class="weather-stat-value">--%</span>
+          </div>
+          <div class="weather-stat">
+            <span class="weather-stat-label">Vento agora</span>
+            <span id="weather-hero-wind" class="weather-stat-value">-- km/h</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane-head weather-days-head">
+        <h2>Próximos 15 dias</h2>
+        <span id="weather-page-updated" class="count"></span>
+      </div>
+
+      <div class="settings-body weather-days-body">
+        <section class="pane weather-days-pane">
+          <div id="weather-days-list" class="weather-days-list"></div>
+        </section>
+      </div>
+
+      <footer class="settings-foot">
+        <span id="weather-page-status" class="status-text">Use as setas para navegar • Voltar fecha</span>
         <span class="brand">Dashboard</span>
       </footer>
     </section>

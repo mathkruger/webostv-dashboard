@@ -12,6 +12,7 @@ O app funciona como uma tela inicial alternativa: uma grade de atalhos para apps
 - Ajustes no próprio app: adicionar, remover e reordenar atalhos.
 - Aba **Aparência** com 6 wallpapers, 5 cores sólidas e modo aleatório por abertura.
 - Previsão do tempo ao lado do relógio, com cidade configurável e atualização a cada 15 minutos via [Open-Meteo](https://open-meteo.com/).
+- Tela detalhada do clima com temperatura atual, chuva, vento e previsão dos próximos 15 dias.
 - Card de notícias ao lado do clima, com os 10 títulos mais recentes alternando na tela inicial e atualização a cada 1 hora.
 - Página de notícias com feed RSS configurável, resultados paginados, botão **Atualizar** e abertura da matéria no navegador da TV.
 - Catálogo ao vivo via Luna/Homebrew Channel, com fallback local.
@@ -94,6 +95,7 @@ Se o IP local não for detectado corretamente (VPN, Docker, várias interfaces),
   - A aba **Clima** ativa ou desativa a previsão do tempo e permite definir a cidade. Use `OK` em **Cidade** para abrir o teclado da TV, digite o nome e confirme com `OK`; `Voltar` cancela a edição. A busca aceita formatos como `Itu`, `Itu, SP` e `Itu SP`. **Atualizar agora** força uma nova consulta. A previsão vem ativada por padrão com a cidade **São Paulo**; desative a opção se não quiser usá-la.
   - A aba **Notícias** define o feed RSS usado pelo card e pela página de notícias. Use `OK` em **Feed RSS** para digitar o endereço no teclado da TV e confirme com `OK`; `Voltar` cancela. **Atualizar agora** força uma nova leitura e **Restaurar feed padrão** volta para a Agência Brasil. O feed padrão é `https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml`.
   - Na tela inicial, use `↑` a partir da primeira linha de atalhos para focar o card de notícias e `OK` para abrir a página. Nela, `↑`/`↓` navegam pelas matérias, `←`/`→` trocam de página e `OK` abre a matéria no navegador da TV. `Voltar` fecha a página.
+  - Use `←` a partir do card de notícias para focar o card de previsão do tempo e `OK` para abrir a tela detalhada. Ela mostra a temperatura atual, a chuva e o vento de hoje e a previsão dos próximos 15 dias. `↑`/`↓`/`←`/`→` navegam pelos dias e `Voltar` fecha a tela.
   - Use `↑`/`↓`/`←`/`→` para navegar entre as abas e os cartões; `OK` aplica a opção.
 - A engrenagem no topo também abre os ajustes.
 
