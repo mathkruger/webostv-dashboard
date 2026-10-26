@@ -83,7 +83,7 @@ Se o IP local não for detectado corretamente (VPN, Docker, várias interfaces),
 ## Uso
 
 - Use as setas do controle para navegar e `OK` para abrir.
-- O botão **Todos os apps** no topo abre uma lista completa de aplicativos e entradas (HDMI, AV, TV ao vivo) para abrir qualquer um sem precisar adicioná-lo à tela inicial.
+- O botão **Todos os apps** no topo abre uma lista completa de aplicativos e entradas (HDMI, AV, TV ao vivo) para abrir qualquer um sem precisar adicioná-lo à tela inicial. Na lista, use `↑` para focar o botão **Fechar**.
 - `Voltar` abre os ajustes na tela inicial; dentro dos ajustes, fecha a tela.
 - A opção **Voltar ao sair dos apps** faz o Dashboard reaparecer quando você fecha um app aberto por ele (ou aperta `Home` dentro do app), inclusive quando a TV volta para Live TV/HDMI.
 - No painel de ajustes:
@@ -165,12 +165,13 @@ app/                         App web instalado na TV
       constants.js           Teclas, paleta e configuração base
       store.js               Estado compartilhado da interface
       dom.js                 Cache de elementos e utilitários de DOM
+      focus.js               Navegação direcional genérica entre itens focáveis
       utils.js               Funções auxiliares
       pointer.js             Cursor e foco por mouse
       clock.js               Relógio e data
       ui.js                  Status, dica e toast
       glyphs.js              SVGs de entradas e ações do sistema
-      keyboard.js            Roteamento de teclas por tela
+      keyboard.js            Captura de teclas e entrada de texto
     services/
       scripts.js             Scripts shell embutidos (wake/return)
       luna.js                Chamadas Luna e execução root

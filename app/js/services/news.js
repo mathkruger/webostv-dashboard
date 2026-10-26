@@ -563,6 +563,10 @@
     refreshNewsFocus();
   }
 
+  function newsActions() {
+    return [els.newsRefresh, els.newsPrev, els.newsNext];
+  }
+
   function refreshNewsFocus() {
     if (!STATE.newsOpen) {
       return;
@@ -570,7 +574,7 @@
     if (els.newsDone) {
       els.newsDone.classList.toggle('focused', STATE.newsZone === 'done');
     }
-    var actions = [els.newsRefresh, els.newsPrev, els.newsNext];
+    var actions = newsActions();
     for (var i = 0; i < actions.length; i += 1) {
       if (actions[i]) {
         actions[i].classList.toggle('focused', STATE.newsZone === 'actions' && STATE.newsActionIndex === i);
@@ -813,66 +817,52 @@
     });
   }
 
-  function handleNewsKey(code) {
-    if (code === KEY.BACK || code === KEY.ESC) {
-      closeNews();
-      return;
-    }
+  function newsItems() {
+    var items = [els.newsDone].concat(newsActions());
+    return items.concat(newsRows);
+  }
 
+  function newsCurrent() {
     if (STATE.newsZone === 'done') {
-      if (code === KEY.DOWN || code === KEY.LEFT) {
-        STATE.newsZone = 'actions';
-        STATE.newsActionIndex = 0;
-      } else if (code === KEY.ENTER) {
-        closeNews();
-        return;
-      }
-      refreshNewsFocus();
-      return;
+      return els.newsDone;
     }
-
     if (STATE.newsZone === 'actions') {
-      if (code === KEY.LEFT) {
-        STATE.newsActionIndex = Math.max(0, STATE.newsActionIndex - 1);
-      } else if (code === KEY.RIGHT) {
-        STATE.newsActionIndex = Math.min(2, STATE.newsActionIndex + 1);
-      } else if (code === KEY.DOWN) {
-        STATE.newsZone = 'list';
-        STATE.newsIndex = App.utils.clamp(STATE.newsIndex, 0, Math.max(0, pageItems.length - 1));
-      } else if (code === KEY.UP) {
-        STATE.newsZone = 'done';
-      } else if (code === KEY.ENTER) {
-        activateNewsAction();
-      }
-      refreshNewsFocus();
-      return;
+      return newsActions()[STATE.newsActionIndex] || null;
     }
+    return newsRows[STATE.newsIndex] || null;
+  }
 
-    if (code === KEY.UP) {
-      if (STATE.newsIndex > 0) {
-        STATE.newsIndex -= 1;
-      } else {
-        STATE.newsZone = 'actions';
-        STATE.newsActionIndex = 0;
-      }
-    } else if (code === KEY.DOWN) {
-      if (STATE.newsIndex < pageItems.length - 1) {
-        STATE.newsIndex += 1;
-      }
-    } else if (code === KEY.LEFT) {
-      changePage(-1);
-      return;
-    } else if (code === KEY.RIGHT) {
-      changePage(1);
-      return;
-    } else if (code === KEY.ENTER) {
-      var item = pageItems[STATE.newsIndex];
-      if (item) {
-        openArticle(item);
-      }
-      return;
+  function newsFocusElement(element) {
+    if (element === els.newsDone) {
+      STATE.newsZone = 'done';
+    } else if (newsActions().indexOf(element) >= 0) {
+      STATE.newsZone = 'actions';
+      STATE.newsActionIndex = newsActions().indexOf(element);
+    } else {
+      var index = Number(element.getAttribute('data-news-item'));
+      STATE.newsZone = 'list';
+      STATE.newsIndex = isNaN(index) ? 0 : index - pageStart;
     }
     refreshNewsFocus();
+  }
+
+  function newsKey(code) {
+    if (STATE.newsZone === 'list' && (code === KEY.LEFT || code === KEY.RIGHT)) {
+      changePage(code === KEY.LEFT ? -1 : 1);
+      return true;
+    }
+    if (STATE.newsZone === 'done' && code === KEY.DOWN) {
+      STATE.newsZone = 'actions';
+      STATE.newsActionIndex = 0;
+      refreshNewsFocus();
+      return true;
+    }
+    if (STATE.newsZone === 'actions' && code === KEY.UP) {
+      STATE.newsZone = 'done';
+      refreshNewsFocus();
+      return true;
+    }
+    return false;
   }
 
   function onNewsCardClick(event) {
@@ -1136,7 +1126,6 @@
     refreshNewsFocus: refreshNewsFocus,
     openNews: openNews,
     closeNews: closeNews,
-    handleNewsKey: handleNewsKey,
     openArticle: openArticle,
     activateNewsRow: activateNewsRow,
     onNewsCardClick: onNewsCardClick,
@@ -1162,4 +1151,12 @@
       return news.loading;
     }
   };
+
+  App.focus.register('news', {
+    items: newsItems,
+    current: newsCurrent,
+    onFocus: newsFocusElement,
+    onKey: newsKey,
+    onBack: closeNews
+  });
 })(window);

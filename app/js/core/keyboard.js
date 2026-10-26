@@ -30,15 +30,7 @@
     if (code === KEY.LEFT || code === KEY.UP || code === KEY.RIGHT || code === KEY.DOWN || code === KEY.ENTER || code === KEY.BACK || code === KEY.ESC) {
       event.preventDefault();
     }
-    if (STATE.screen === 'settings') {
-      App.settings.handleSettingsKey(code);
-    } else if (STATE.screen === 'allapps') {
-      App.allApps.handleAllAppsKey(code);
-    } else if (STATE.screen === 'news') {
-      App.news.handleNewsKey(code);
-    } else {
-      App.home.handleHomeKey(code);
-    }
+    App.focus.handleKey(STATE.screen, code);
   }
 
   App.keyboard = {

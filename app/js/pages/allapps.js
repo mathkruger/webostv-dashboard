@@ -5,8 +5,6 @@
   var store = App.store;
   var STATE = store.STATE;
   var els = store.els;
-  var CONFIG = App.config;
-  var KEY = App.KEY;
 
   function openAllApps() {
     if (STATE.allOpen) {
@@ -18,6 +16,7 @@
     STATE.allOpen = true;
     STATE.screen = 'allapps';
     STATE.allFocus = 0;
+    STATE.allZone = 'list';
     STATE.appsFocus = true;
     STATE.gearFocus = false;
     STATE.emptyFocus = false;
@@ -39,9 +38,11 @@
       return;
     }
     STATE.allOpen = false;
+    STATE.allZone = 'list';
     STATE.screen = 'home';
     els.allapps.classList.remove('open');
     els.allapps.setAttribute('aria-hidden', 'true');
+    els.allappsDone.classList.remove('focused');
     App.home.refreshHomeFocus();
   }
 
@@ -135,8 +136,9 @@
     if (!STATE.allOpen) {
       return;
     }
+    els.allappsDone.classList.toggle('focused', STATE.allZone === 'done');
     store.allRows.forEach(function (row, index) {
-      var focused = index === STATE.allFocus;
+      var focused = STATE.allZone === 'list' && index === STATE.allFocus;
       row.classList.toggle('focused', focused);
       if (focused) {
         App.dom.scrollRowIntoView(els.allappsList, row);
@@ -153,7 +155,8 @@
       return;
     }
     var index = Number(row.getAttribute('data-all-index'));
-    if (STATE.allFocus !== index) {
+    if (STATE.allFocus !== index || STATE.allZone !== 'list') {
+      STATE.allZone = 'list';
       STATE.allFocus = index;
       refreshAllAppsFocus();
     }
@@ -164,6 +167,7 @@
     if (!row) {
       return;
     }
+    STATE.allZone = 'list';
     STATE.allFocus = Number(row.getAttribute('data-all-index'));
     refreshAllAppsFocus();
     launchAllItem();
@@ -180,28 +184,27 @@
     App.launcher.launchShortcut(shortcut, null);
   }
 
-  function handleAllAppsKey(code) {
-    if (code === KEY.BACK || code === KEY.ESC) {
-      closeAllApps();
-      return;
+  function allAppsItems() {
+    var items = [els.allappsDone];
+    return items.concat(store.allRows);
+  }
+
+  function allAppsCurrent() {
+    if (STATE.allZone === 'done') {
+      return els.allappsDone;
     }
-    if (code === KEY.UP) {
-      if (STATE.allFocus > 0) {
-        STATE.allFocus -= 1;
-        refreshAllAppsFocus();
-      }
-      return;
+    return store.allRows[STATE.allFocus] || null;
+  }
+
+  function allAppsFocusElement(element) {
+    if (element === els.allappsDone) {
+      STATE.allZone = 'done';
+    } else {
+      var index = Number(element.getAttribute('data-all-index'));
+      STATE.allZone = 'list';
+      STATE.allFocus = isNaN(index) ? 0 : index;
     }
-    if (code === KEY.DOWN) {
-      if (STATE.allFocus < STATE.allItems.length - 1) {
-        STATE.allFocus += 1;
-        refreshAllAppsFocus();
-      }
-      return;
-    }
-    if (code === KEY.ENTER) {
-      launchAllItem();
-    }
+    refreshAllAppsFocus();
   }
 
   App.allApps = {
@@ -213,7 +216,13 @@
     refreshAllAppsFocus: refreshAllAppsFocus,
     onAllHover: onAllHover,
     onAllClick: onAllClick,
-    launchAllItem: launchAllItem,
-    handleAllAppsKey: handleAllAppsKey
+    launchAllItem: launchAllItem
   };
+
+  App.focus.register('allapps', {
+    items: allAppsItems,
+    current: allAppsCurrent,
+    onFocus: allAppsFocusElement,
+    onBack: closeAllApps
+  });
 })(window);

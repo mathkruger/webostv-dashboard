@@ -5,7 +5,6 @@
   var store = App.store;
   var STATE = store.STATE;
   var els = store.els;
-  var CONFIG = App.config;
   var KEY = App.KEY;
   var WALLPAPER_COLUMNS = App.WALLPAPER_COLUMNS;
   var TABS = ['shortcuts', 'appearance', 'weather', 'news'];
@@ -708,176 +707,237 @@
     App.news.activateNewsRow();
   }
 
-  function handleSettingsKey(code) {
+  function settingsTabNodes() {
+    if (!els.settingsTabs) {
+      return [];
+    }
+    return Array.prototype.slice.call(els.settingsTabs.querySelectorAll('.settings-tab'));
+  }
+
+  function queryNodes(root, selector) {
+    if (!root) {
+      return [];
+    }
+    return Array.prototype.slice.call(root.querySelectorAll(selector));
+  }
+
+  function settingsWeatherNodes() {
+    return queryNodes(els.weatherSettingsList, '[data-weather-index]');
+  }
+
+  function settingsNewsNodes() {
+    return queryNodes(els.newsSettingsList, '[data-news-index]');
+  }
+
+  function settingsItems() {
+    var items = [els.settingsDone].concat(settingsTabNodes());
+    if (STATE.settingsTab === 'shortcuts') {
+      items = items.concat(store.currentRows, store.addRows);
+    } else if (STATE.settingsTab === 'appearance') {
+      items = items.concat(wallpaperCards);
+    } else if (STATE.settingsTab === 'weather') {
+      items = items.concat(settingsWeatherNodes());
+    } else if (STATE.settingsTab === 'news') {
+      items = items.concat(settingsNewsNodes());
+    }
+    return items;
+  }
+
+  function settingsCurrent() {
+    if (STATE.settingsZone === 'done') {
+      return els.settingsDone;
+    }
+    if (STATE.settingsZone === 'tabs') {
+      return settingsTabNodes()[STATE.tabIndex] || null;
+    }
+    if (STATE.settingsZone === 'current') {
+      return store.currentRows[STATE.currentIndex] || null;
+    }
+    if (STATE.settingsZone === 'add') {
+      return store.addRows[STATE.addIndex] || null;
+    }
+    if (STATE.settingsZone === 'appearance') {
+      return wallpaperCards[STATE.wallpaperIndex] || null;
+    }
+    if (STATE.settingsZone === 'weather') {
+      return settingsWeatherNodes()[STATE.weatherIndex] || null;
+    }
+    if (STATE.settingsZone === 'news') {
+      return settingsNewsNodes()[STATE.newsSettingsIndex] || null;
+    }
+    return null;
+  }
+
+  function settingsFocusElement(element) {
+    if (element === els.settingsDone) {
+      STATE.settingsZone = 'done';
+    } else if (element.getAttribute('data-tab')) {
+      var tabIndex = TABS.indexOf(element.getAttribute('data-tab'));
+      STATE.settingsZone = 'tabs';
+      STATE.tabIndex = tabIndex < 0 ? 0 : tabIndex;
+    } else if (element.getAttribute('data-current-index') !== null) {
+      STATE.settingsZone = 'current';
+      STATE.currentIndex = Number(element.getAttribute('data-current-index'));
+    } else if (element.getAttribute('data-add-index') !== null) {
+      STATE.settingsZone = 'add';
+      STATE.addIndex = Number(element.getAttribute('data-add-index'));
+    } else if (element.getAttribute('data-wallpaper-index') !== null) {
+      STATE.settingsZone = 'appearance';
+      STATE.wallpaperIndex = Number(element.getAttribute('data-wallpaper-index'));
+    } else if (element.getAttribute('data-weather-index') !== null) {
+      STATE.settingsZone = 'weather';
+      STATE.weatherIndex = Number(element.getAttribute('data-weather-index'));
+    } else if (element.getAttribute('data-news-index') !== null) {
+      STATE.settingsZone = 'news';
+      STATE.newsSettingsIndex = Number(element.getAttribute('data-news-index'));
+    }
+    refreshSettingsFocus();
+  }
+
+  function settingsKey(code) {
     if (STATE.moving) {
       handleMoveKey(code);
-      return;
-    }
-
-    if (code === KEY.BACK || code === KEY.ESC) {
-      closeSettings();
-      return;
-    }
-
-    if (STATE.settingsZone === 'tabs') {
-      if (code === KEY.LEFT) {
-        STATE.settingsZone = 'tabs';
-        STATE.tabIndex = Math.max(0, STATE.tabIndex - 1);
-        setSettingsTab(TABS[STATE.tabIndex]);
-      } else if (code === KEY.RIGHT) {
-        STATE.settingsZone = 'tabs';
-        STATE.tabIndex = Math.min(TABS.length - 1, STATE.tabIndex + 1);
-        setSettingsTab(TABS[STATE.tabIndex]);
-      } else if (code === KEY.DOWN || code === KEY.ENTER) {
-        setSettingsTab(TABS[STATE.tabIndex]);
-        focusSettingsContent();
-      } else if (code === KEY.UP) {
-        STATE.settingsZone = 'done';
-        refreshSettingsFocus();
-      }
-      return;
+      return true;
     }
 
     if (STATE.settingsZone === 'done') {
-      if (code === KEY.DOWN) {
-        focusSettingsContent();
-      } else if (code === KEY.LEFT) {
+      if (code === KEY.LEFT) {
         STATE.settingsZone = 'tabs';
         STATE.tabIndex = TABS.indexOf(STATE.settingsTab);
         if (STATE.tabIndex < 0) {
           STATE.tabIndex = 0;
         }
         refreshSettingsFocus();
-      } else if (code === KEY.ENTER) {
-        closeSettings();
+        return true;
       }
-      return;
+      if (code === KEY.DOWN) {
+        focusSettingsContent();
+        return true;
+      }
+    }
+
+    if (STATE.settingsZone === 'tabs') {
+      if (code === KEY.LEFT) {
+        STATE.tabIndex = Math.max(0, STATE.tabIndex - 1);
+        setSettingsTab(TABS[STATE.tabIndex]);
+        return true;
+      }
+      if (code === KEY.RIGHT) {
+        STATE.tabIndex = Math.min(TABS.length - 1, STATE.tabIndex + 1);
+        setSettingsTab(TABS[STATE.tabIndex]);
+        return true;
+      }
+      if (code === KEY.UP) {
+        STATE.settingsZone = 'done';
+        refreshSettingsFocus();
+        return true;
+      }
+      if (code === KEY.DOWN || code === KEY.ENTER) {
+        setSettingsTab(TABS[STATE.tabIndex]);
+        focusSettingsContent();
+        return true;
+      }
+      return false;
     }
 
     if (STATE.settingsZone === 'current') {
-      if (code === KEY.UP) {
-        if (STATE.currentIndex > 0) {
-          STATE.currentIndex -= 1;
-        } else {
-          STATE.settingsZone = 'tabs';
-          STATE.tabIndex = 0;
-        }
+      if (code === KEY.UP && STATE.currentIndex === 0) {
+        STATE.settingsZone = 'tabs';
+        STATE.tabIndex = 0;
         refreshSettingsFocus();
-      } else if (code === KEY.DOWN) {
-        if (STATE.currentIndex < STATE.shortcuts.length - 1) {
-          STATE.currentIndex += 1;
-          refreshSettingsFocus();
-        }
-      } else if (code === KEY.RIGHT) {
-        if (STATE.addItems.length) {
-          STATE.settingsZone = 'add';
-          STATE.addIndex = App.utils.clamp(STATE.addIndex, 0, STATE.addItems.length - 1);
-          refreshSettingsFocus();
-        }
-      } else if (code === KEY.ENTER) {
-        if (STATE.shortcuts.length) {
-          startMove();
-        }
+        return true;
       }
-      return;
+      if (code === KEY.DOWN && STATE.currentIndex >= STATE.shortcuts.length - 1) {
+        return true;
+      }
+      if (code === KEY.LEFT) {
+        return true;
+      }
     }
 
     if (STATE.settingsZone === 'add') {
-      if (code === KEY.UP) {
-        if (STATE.addIndex > 0) {
-          STATE.addIndex -= 1;
-        } else {
-          STATE.settingsZone = 'tabs';
-          STATE.tabIndex = 0;
-        }
+      if (code === KEY.UP && STATE.addIndex === 0) {
+        STATE.settingsZone = 'tabs';
+        STATE.tabIndex = 0;
         refreshSettingsFocus();
-      } else if (code === KEY.DOWN) {
-        if (STATE.addIndex < STATE.addItems.length - 1) {
-          STATE.addIndex += 1;
-          refreshSettingsFocus();
-        }
-      } else if (code === KEY.LEFT) {
-        STATE.settingsZone = STATE.shortcuts.length ? 'current' : 'done';
-        STATE.currentIndex = App.utils.clamp(STATE.currentIndex, 0, Math.max(0, STATE.shortcuts.length - 1));
-        refreshSettingsFocus();
-      } else if (code === KEY.ENTER) {
-        activateAddItem();
+        return true;
       }
-      return;
+      if (code === KEY.DOWN && STATE.addIndex >= STATE.addItems.length - 1) {
+        return true;
+      }
+      if (code === KEY.LEFT && !STATE.shortcuts.length) {
+        STATE.settingsZone = 'done';
+        refreshSettingsFocus();
+        return true;
+      }
+      if (code === KEY.RIGHT) {
+        return true;
+      }
     }
 
     if (STATE.settingsZone === 'appearance') {
-      var count = wallpaperEntries.length;
-      var columns = WALLPAPER_COLUMNS;
-      var index = STATE.wallpaperIndex;
-      if (code === KEY.LEFT) {
-        if (index % columns > 0) {
-          STATE.wallpaperIndex = index - 1;
-        }
-      } else if (code === KEY.RIGHT) {
-        if (index % columns < columns - 1 && index + 1 < count) {
-          STATE.wallpaperIndex = index + 1;
-        }
-      } else if (code === KEY.UP) {
-        if (index >= columns) {
-          STATE.wallpaperIndex = index - columns;
-        } else {
-          STATE.settingsZone = 'tabs';
-          STATE.tabIndex = 1;
-        }
-      } else if (code === KEY.DOWN) {
-        if (index + columns < count) {
-          STATE.wallpaperIndex = index + columns;
-        }
-      } else if (code === KEY.ENTER) {
-        App.wallpaper.selectWallpaper(wallpaperEntries[index]);
+      var wallCount = wallpaperEntries.length;
+      var wallIndex = STATE.wallpaperIndex;
+      if (code === KEY.LEFT && wallIndex % WALLPAPER_COLUMNS === 0) {
+        return true;
       }
-      refreshSettingsFocus();
-      return;
+      if (code === KEY.RIGHT && !(wallIndex % WALLPAPER_COLUMNS < WALLPAPER_COLUMNS - 1 && wallIndex + 1 < wallCount)) {
+        return true;
+      }
+      if (code === KEY.UP && wallIndex < WALLPAPER_COLUMNS) {
+        STATE.settingsZone = 'tabs';
+        STATE.tabIndex = 1;
+        refreshSettingsFocus();
+        return true;
+      }
+      if (code === KEY.DOWN && wallIndex + WALLPAPER_COLUMNS >= wallCount) {
+        return true;
+      }
+    }
+
+    if (STATE.settingsZone === 'weather' && (code === KEY.LEFT || code === KEY.RIGHT)) {
+      if (code === KEY.LEFT) {
+        STATE.settingsZone = 'tabs';
+        STATE.tabIndex = 2;
+        refreshSettingsFocus();
+      }
+      return true;
+    }
+
+    if (STATE.settingsZone === 'news' && (code === KEY.LEFT || code === KEY.RIGHT)) {
+      if (code === KEY.LEFT) {
+        STATE.settingsZone = 'tabs';
+        STATE.tabIndex = 3;
+        refreshSettingsFocus();
+      }
+      return true;
     }
 
     if (STATE.settingsZone === 'weather') {
-      if (code === KEY.UP) {
-        if (STATE.weatherIndex > 0) {
-          STATE.weatherIndex -= 1;
-        } else {
-          STATE.settingsZone = 'tabs';
-          STATE.tabIndex = 2;
-        }
-      } else if (code === KEY.DOWN) {
-        if (STATE.weatherIndex < 2) {
-          STATE.weatherIndex += 1;
-        }
-      } else if (code === KEY.LEFT) {
+      if (code === KEY.UP && STATE.weatherIndex === 0) {
         STATE.settingsZone = 'tabs';
         STATE.tabIndex = 2;
-      } else if (code === KEY.ENTER) {
-        activateWeatherRow();
+        refreshSettingsFocus();
+        return true;
       }
-      refreshSettingsFocus();
-      return;
+      if (code === KEY.DOWN && STATE.weatherIndex >= settingsWeatherNodes().length - 1) {
+        return true;
+      }
     }
 
     if (STATE.settingsZone === 'news') {
-      if (code === KEY.UP) {
-        if (STATE.newsSettingsIndex > 0) {
-          STATE.newsSettingsIndex -= 1;
-        } else {
-          STATE.settingsZone = 'tabs';
-          STATE.tabIndex = 3;
-        }
-      } else if (code === KEY.DOWN) {
-        if (STATE.newsSettingsIndex < 2) {
-          STATE.newsSettingsIndex += 1;
-        }
-      } else if (code === KEY.LEFT) {
+      if (code === KEY.UP && STATE.newsSettingsIndex === 0) {
         STATE.settingsZone = 'tabs';
         STATE.tabIndex = 3;
-      } else if (code === KEY.ENTER) {
-        App.news.activateNewsRow();
+        refreshSettingsFocus();
+        return true;
       }
-      refreshSettingsFocus();
+      if (code === KEY.DOWN && STATE.newsSettingsIndex >= settingsNewsNodes().length - 1) {
+        return true;
+      }
     }
+
+    return false;
   }
 
   function activateWeatherRow() {
@@ -1053,7 +1113,6 @@
     onNewsHover: onNewsHover,
     onNewsClick: onNewsClick,
     activateWeatherRow: activateWeatherRow,
-    handleSettingsKey: handleSettingsKey,
     handleMoveKey: handleMoveKey,
     startMove: startMove,
     moveCurrent: moveCurrent,
@@ -1063,4 +1122,12 @@
     activateAddItem: activateAddItem,
     toggleShortcut: toggleShortcut
   };
+
+  App.focus.register('settings', {
+    items: settingsItems,
+    current: settingsCurrent,
+    onFocus: settingsFocusElement,
+    onKey: settingsKey,
+    onBack: closeSettings
+  });
 })(window);

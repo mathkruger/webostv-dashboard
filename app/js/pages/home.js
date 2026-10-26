@@ -5,7 +5,6 @@
   var store = App.store;
   var STATE = store.STATE;
   var els = store.els;
-  var CONFIG = App.config;
   var KEY = App.KEY;
 
   function renderHome() {
@@ -108,147 +107,88 @@
     App.launcher.launchShortcut(STATE.shortcuts[index], tile);
   }
 
-  function handleHomeKey(code) {
-    if (code === KEY.BACK || code === KEY.ESC) {
-      App.settings.openSettings();
-      return;
-    }
-    if (!STATE.shortcuts.length) {
-      if (STATE.newsFocus) {
-        if (code === KEY.ENTER) {
-          App.news.openNews();
-        } else if (code === KEY.DOWN) {
-          STATE.newsFocus = false;
-          STATE.emptyFocus = true;
-          refreshHomeFocus();
-        } else if (code === KEY.RIGHT) {
-          STATE.newsFocus = false;
-          STATE.appsFocus = true;
-          refreshHomeFocus();
-        }
-        return;
-      }
-      if (STATE.appsFocus) {
-        if (code === KEY.ENTER) {
-          App.allApps.openAllApps();
-        } else if (code === KEY.RIGHT) {
-          STATE.appsFocus = false;
-          STATE.gearFocus = true;
-          refreshHomeFocus();
-        } else if (code === KEY.DOWN) {
-          STATE.appsFocus = false;
-          STATE.emptyFocus = true;
-          refreshHomeFocus();
-        }
-        return;
-      }
-      if (STATE.gearFocus) {
-        if (code === KEY.ENTER) {
-          App.settings.openSettings();
-        } else if (code === KEY.LEFT) {
-          STATE.gearFocus = false;
-          STATE.appsFocus = true;
-          refreshHomeFocus();
-        } else if (code === KEY.DOWN) {
-          STATE.gearFocus = false;
-          STATE.emptyFocus = true;
-          refreshHomeFocus();
-        }
-        return;
-      }
-      if (code === KEY.ENTER) {
-        App.settings.openSettings();
-      } else if (code === KEY.UP) {
-        STATE.emptyFocus = false;
-        STATE.newsFocus = true;
-        refreshHomeFocus();
-      } else if (code === KEY.LEFT) {
-        STATE.emptyFocus = false;
-        STATE.appsFocus = true;
-        refreshHomeFocus();
-      }
-      return;
-    }
+  function homeTiles() {
+    return Array.prototype.slice.call(els.grid.children);
+  }
 
+  function homeItems() {
+    var items = homeTiles();
+    items.push(els.news, els.appsButton, els.settingsButton, els.emptyAction);
+    return items;
+  }
+
+  function homeCurrent() {
     if (STATE.newsFocus) {
-      if (code === KEY.ENTER) {
-        App.news.openNews();
-      } else if (code === KEY.DOWN) {
-        STATE.newsFocus = false;
-        STATE.homeFocus = App.utils.clamp(STATE.homeFocus, 0, STATE.shortcuts.length - 1);
-        refreshHomeFocus();
-      } else if (code === KEY.RIGHT) {
-        STATE.newsFocus = false;
-        STATE.appsFocus = true;
-        refreshHomeFocus();
-      }
-      return;
+      return els.news;
     }
-
     if (STATE.appsFocus) {
-      if (code === KEY.ENTER) {
-        App.allApps.openAllApps();
-      } else if (code === KEY.RIGHT) {
-        STATE.appsFocus = false;
-        STATE.gearFocus = true;
-        refreshHomeFocus();
-      } else if (code === KEY.DOWN) {
-        STATE.appsFocus = false;
-        STATE.homeFocus = App.utils.clamp(STATE.homeFocus, 0, STATE.shortcuts.length - 1);
-        refreshHomeFocus();
-      }
-      return;
+      return els.appsButton;
     }
-
     if (STATE.gearFocus) {
-      if (code === KEY.DOWN) {
-        STATE.gearFocus = false;
-        STATE.homeFocus = App.utils.clamp(STATE.homeFocus, 0, STATE.shortcuts.length - 1);
-        refreshHomeFocus();
-      } else if (code === KEY.LEFT) {
-        STATE.gearFocus = false;
-        STATE.appsFocus = true;
-        refreshHomeFocus();
-      } else if (code === KEY.ENTER) {
-        App.settings.openSettings();
-      }
-      return;
+      return els.settingsButton;
     }
+    if (STATE.emptyFocus) {
+      return els.emptyAction;
+    }
+    return homeTiles()[STATE.homeFocus] || null;
+  }
 
-    var count = STATE.shortcuts.length;
-    var columns = Math.min(6, count);
-    var index = STATE.homeFocus;
-
-    if (code === KEY.LEFT) {
-      if (index % columns > 0) {
-        STATE.homeFocus = index - 1;
-      }
-    } else if (code === KEY.RIGHT) {
-      if (index % columns < columns - 1 && index + 1 < count) {
-        STATE.homeFocus = index + 1;
-      }
-    } else if (code === KEY.UP) {
-      if (index >= columns) {
-        STATE.homeFocus = index - columns;
-      } else {
-        STATE.newsFocus = true;
-      }
-    } else if (code === KEY.DOWN) {
-      if (index + columns < count) {
-        STATE.homeFocus = index + columns;
-      }
-    } else if (code === KEY.ENTER) {
-      App.launcher.launchShortcut(STATE.shortcuts[index], els.grid.children[index]);
-      return;
+  function homeFocusElement(element) {
+    STATE.newsFocus = element === els.news;
+    STATE.appsFocus = element === els.appsButton;
+    STATE.gearFocus = element === els.settingsButton;
+    STATE.emptyFocus = element === els.emptyAction;
+    if (element.getAttribute('data-index') !== null) {
+      STATE.homeFocus = Number(element.getAttribute('data-index'));
     }
     refreshHomeFocus();
+  }
+
+  function homeKey(code) {
+    var current = homeCurrent();
+    if (!current) {
+      return false;
+    }
+    if (current === els.emptyAction) {
+      if (code === KEY.UP) {
+        homeFocusElement(els.news);
+        return true;
+      }
+      if (code === KEY.LEFT) {
+        homeFocusElement(els.appsButton);
+        return true;
+      }
+    }
+    if (!STATE.shortcuts.length && code === KEY.DOWN &&
+      (current === els.news || current === els.appsButton || current === els.settingsButton)) {
+      homeFocusElement(els.emptyAction);
+      return true;
+    }
+    if (code === KEY.UP && current.getAttribute('data-index') !== null) {
+      var index = Number(current.getAttribute('data-index'));
+      var columns = Math.min(6, homeTiles().length);
+      if (index < columns) {
+        homeFocusElement(els.news);
+        return true;
+      }
+    }
+    return false;
   }
 
   App.home = {
     renderHome: renderHome,
     refreshHomeFocus: refreshHomeFocus,
     onGridHover: onGridHover,
-    onGridClick: onGridClick,
-    handleHomeKey: handleHomeKey
+    onGridClick: onGridClick
   };
+
+  App.focus.register('home', {
+    items: homeItems,
+    current: homeCurrent,
+    onFocus: homeFocusElement,
+    onKey: homeKey,
+    onBack: function () {
+      App.settings.openSettings();
+    }
+  });
 })(window);

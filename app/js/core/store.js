@@ -20,6 +20,7 @@
     newsSettingsIndex: 0,
     allOpen: false,
     allFocus: 0,
+    allZone: 'list',
     allItems: [],
     settingsOpen: false,
     settingsTab: 'shortcuts',
