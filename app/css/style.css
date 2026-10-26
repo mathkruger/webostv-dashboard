@@ -930,26 +930,29 @@ button {
 }
 
 .weather-days-list {
-  display: grid;
+  display: flex;
   flex: 1;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  grid-auto-rows: max-content;
-  gap: 1.1vh 1.1vw;
+  flex-wrap: wrap;
+  align-content: flex-start;
   min-height: 0;
   padding-right: 0.4vw;
   overflow-y: auto;
-  align-content: start;
 }
 
 .weather-day-card {
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  flex: 0 0 calc((100% - 4.4vw) / 5);
   min-height: 12.5vh;
+  margin: 0 1.1vw 1.1vh 0;
   padding: 1.2vh 1vw;
   border-radius: 1.3vh;
   background: var(--panel);
   transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.weather-day-card:nth-child(5n) {
+  margin-right: 0;
 }
 
 .weather-day-top,
