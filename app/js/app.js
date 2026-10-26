@@ -58,8 +58,10 @@
     els.allappsDone.addEventListener('click', function () {
       App.allApps.closeAllApps();
     }, false);
-    els.allappsList.addEventListener('mouseover', App.allApps.onAllHover, false);
-    els.allappsList.addEventListener('click', App.allApps.onAllClick, false);
+    els.allappsAppsList.addEventListener('mouseover', App.allApps.onAllHover, false);
+    els.allappsAppsList.addEventListener('click', App.allApps.onAllClick, false);
+    els.allappsInputsList.addEventListener('mouseover', App.allApps.onAllHover, false);
+    els.allappsInputsList.addEventListener('click', App.allApps.onAllClick, false);
 
     els.emptyAction.addEventListener('click', App.settings.openSettings, false);
     els.emptyAction.addEventListener('mouseover', function () {
@@ -85,8 +87,10 @@
 
     els.settingsTabs.addEventListener('click', App.settings.onTabClick, false);
     els.settingsTabs.addEventListener('mouseover', App.settings.onTabHover, false);
-    els.wallpaperGrid.addEventListener('mouseover', App.settings.onWallpaperHover, false);
-    els.wallpaperGrid.addEventListener('click', App.settings.onWallpaperClick, false);
+    els.wallpaperImageList.addEventListener('mouseover', App.settings.onWallpaperHover, false);
+    els.wallpaperImageList.addEventListener('click', App.settings.onWallpaperClick, false);
+    els.wallpaperColorList.addEventListener('mouseover', App.settings.onWallpaperHover, false);
+    els.wallpaperColorList.addEventListener('click', App.settings.onWallpaperClick, false);
     els.weatherSettingsList.addEventListener('mouseover', App.settings.onWeatherHover, false);
     els.weatherSettingsList.addEventListener('click', App.settings.onWeatherClick, false);
     els.newsSettingsList.addEventListener('mouseover', App.settings.onNewsHover, false);

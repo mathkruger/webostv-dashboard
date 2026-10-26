@@ -55,7 +55,10 @@
     els.weatherRefreshMeta = $('weather-refresh-meta');
     els.weatherStatus = $('weather-status');
     els.weatherHint = $('weather-hint');
-    els.wallpaperGrid = $('wallpaper-grid');
+    els.wallpaperImageList = $('wallpaper-image-list');
+    els.wallpaperColorList = $('wallpaper-color-list');
+    els.wallpaperImageCount = $('wallpaper-image-count');
+    els.wallpaperColorCount = $('wallpaper-color-count');
     els.wallpaperCurrent = $('wallpaper-current');
     els.currentList = $('current-list');
     els.addList = $('add-list');
@@ -64,8 +67,10 @@
     els.statusText = $('status-text');
     els.allapps = $('allapps');
     els.allappsDone = $('allapps-done');
-    els.allappsList = $('allapps-list');
-    els.allappsCount = $('allapps-count');
+    els.allappsAppsList = $('allapps-apps-list');
+    els.allappsInputsList = $('allapps-inputs-list');
+    els.allappsAppsCount = $('allapps-apps-count');
+    els.allappsInputsCount = $('allapps-inputs-count');
     els.allappsStatus = $('allapps-status');
     els.newsPage = $('news-page');
     els.newsDone = $('news-done');

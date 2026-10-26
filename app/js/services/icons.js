@@ -149,7 +149,7 @@
   }
 
   function updateAllIconNodes() {
-    var maps = [store.tileNodes, store.currentNodes, store.addNodes, store.allNodes];
+    var maps = [store.tileNodes, store.currentNodes, store.addNodes, store.allAppNodes, store.allInputNodes];
     maps.forEach(function (map) {
       Object.keys(map).forEach(function (key) {
         var node = map[key];

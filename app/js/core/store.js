@@ -20,7 +20,8 @@
     newsSettingsIndex: 0,
     allOpen: false,
     allFocus: 0,
-    allZone: 'list',
+    allInputFocus: 0,
+    allZone: 'apps',
     allItems: [],
     settingsOpen: false,
     settingsTab: 'shortcuts',
@@ -31,6 +32,8 @@
     addItems: [],
     wallpaper: null,
     wallpaperIndex: 0,
+    wallpaperColorIndex: 0,
+    appearanceColumn: 'images',
     weatherEditing: false,
     weatherIndex: 0,
     moving: null,
@@ -61,8 +64,10 @@
     addNodes: {},
     currentRows: [],
     addRows: [],
-    allRows: [],
-    allNodes: {},
+    allAppRows: [],
+    allInputRows: [],
+    allAppNodes: {},
+    allInputNodes: {},
     hoverLockUntil: 0
   };
 })(window);

@@ -37,7 +37,16 @@
       { id: 'color-ocean', title: 'Oceano', value: '#0d1b2a' },
       { id: 'color-plum', title: 'Ameixa', value: '#2a1c2e' },
       { id: 'color-moss', title: 'Musgo', value: '#1d2a1f' },
-      { id: 'color-cocoa', title: 'Cacau', value: '#2e2118' }
+      { id: 'color-cocoa', title: 'Cacau', value: '#2e2118' },
+      { id: 'color-midnight', title: 'Meia-noite', value: '#0a0a12' },
+      { id: 'color-wine', title: 'Vinho', value: '#2b1119' },
+      { id: 'color-forest', title: 'Floresta', value: '#0f241c' },
+      { id: 'color-slate', title: 'Ardósia', value: '#1f2933' },
+      { id: 'color-sand', title: 'Areia', value: '#302a1f' },
+      { id: 'color-terracotta', title: 'Terracota', value: '#3a1f18' },
+      { id: 'color-indigo', title: 'Índigo', value: '#191b3a' },
+      { id: 'color-teal', title: 'Petróleo', value: '#0d2b2c' },
+      { id: 'color-rose', title: 'Rosa seco', value: '#331d26' }
     ],
     hbService: 'luna://org.webosbrew.hbchannel.service',
     appManager: 'luna://com.webos.applicationManager',

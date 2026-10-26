@@ -56,7 +56,7 @@
     }
   }
 
-  function buildWallpaperEntries() {
+  function buildWallpaperImageEntries() {
     var entries = [{
       kind: 'random',
       title: 'Aleatório',
@@ -72,6 +72,11 @@
         meta: 'Imagem'
       });
     });
+    return entries;
+  }
+
+  function buildWallpaperColorEntries() {
+    var entries = [];
     (CONFIG.wallpaperColors || []).forEach(function (color) {
       entries.push({
         kind: 'color',
@@ -82,6 +87,10 @@
       });
     });
     return entries;
+  }
+
+  function buildWallpaperEntries() {
+    return buildWallpaperImageEntries().concat(buildWallpaperColorEntries());
   }
 
   function applyWallpaper() {
@@ -162,6 +171,8 @@
     normalizeWallpaperSetting: normalizeWallpaperSetting,
     readWallpaperSetting: readWallpaperSetting,
     saveWallpaperSetting: saveWallpaperSetting,
+    buildWallpaperImageEntries: buildWallpaperImageEntries,
+    buildWallpaperColorEntries: buildWallpaperColorEntries,
     buildWallpaperEntries: buildWallpaperEntries,
     applyWallpaper: applyWallpaper,
     updateWallpaperLabel: updateWallpaperLabel,

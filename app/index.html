@@ -100,14 +100,23 @@
       </div>
 
       <div id="settings-body-appearance" class="settings-body appearance-body hidden">
-        <section class="pane appearance-pane">
-          <div class="pane-head">
-            <h2>Papel de parede</h2>
-            <span id="wallpaper-current" class="count"></span>
-          </div>
-          <div id="wallpaper-grid" class="wallpaper-grid"></div>
-          <div class="pane-hint">OK aplica • Aleatório troca a cada abertura do app</div>
-        </section>
+        <div class="appearance-columns">
+          <section class="pane appearance-pane images-pane">
+            <div class="pane-head">
+              <h2>Imagens</h2>
+              <span id="wallpaper-image-count" class="count"></span>
+            </div>
+            <div id="wallpaper-image-list" class="list wallpaper-list"></div>
+          </section>
+          <section class="pane appearance-pane colors-pane">
+            <div class="pane-head">
+              <h2>Cores sólidas</h2>
+              <span id="wallpaper-color-count" class="count"></span>
+            </div>
+            <div id="wallpaper-color-list" class="list wallpaper-list"></div>
+          </section>
+        </div>
+        <div class="pane-hint">OK aplica • Atual: <span id="wallpaper-current"></span></div>
       </div>
 
       <div id="settings-body-weather" class="settings-body weather-body hidden">
@@ -213,13 +222,20 @@
         <button id="allapps-done" class="done-button" type="button">Fechar</button>
       </header>
 
-      <div class="settings-body">
-        <section class="pane all-pane">
+      <div class="settings-body allapps-body">
+        <section class="pane apps-pane">
           <div class="pane-head">
-            <h2>Apps e fontes</h2>
-            <span id="allapps-count" class="count"></span>
+            <h2>Aplicativos</h2>
+            <span id="allapps-apps-count" class="count"></span>
           </div>
-          <div id="allapps-list" class="list"></div>
+          <div id="allapps-apps-list" class="list"></div>
+        </section>
+        <section class="pane inputs-pane">
+          <div class="pane-head">
+            <h2>Entradas</h2>
+            <span id="allapps-inputs-count" class="count"></span>
+          </div>
+          <div id="allapps-inputs-list" class="list"></div>
         </section>
       </div>
 
