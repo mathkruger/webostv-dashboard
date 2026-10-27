@@ -189,7 +189,12 @@ app/                         App web instalado na TV
     pages/
       home.js                Tela inicial e navegação
       allapps.js             Lista completa de apps e entradas
-      settings.js            Ajustes, atalhos, movimento, aparência, clima e notícias
+      settings.js            Shell dos ajustes, abas e navegação compartilhada
+      settings/
+        shortcuts.js         Aba de atalhos, movimento e ações do sistema
+        appearance.js        Aba de aparência e wallpapers
+        weather.js           Aba de clima
+        news.js              Aba de notícias
   certs/
     cacert.pem               Bundle de CAs usado pelo curl no fallback de notícias
   webOSTVjs-1.2.13/          Bridge webOS
